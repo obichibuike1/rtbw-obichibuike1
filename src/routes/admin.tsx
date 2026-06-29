@@ -60,7 +60,7 @@ function AdminLayout() {
     return () => { supabase.removeChannel(ch); };
   }, [role]);
 
-  if (loading || role !== "admin") return null;
+  if (loading || roleLoading || role !== "admin") return null;
 
   return (
     <div className="admin-theme">
