@@ -85,11 +85,10 @@ export const lookupRecipient = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ accountNumber: z.string().trim().min(4).max(32) }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: acc, error } = await context.supabase
-      .from("accounts")
-      .select("account_number, full_name, account_type")
-      .eq("account_number", data.accountNumber)
-      .maybeSingle();
+    const { data: rows, error } = await (context.supabase.rpc as any)("lookup_recipient", {
+      _account_number: data.accountNumber,
+    });
     if (error) throw new Error(error.message);
-    return acc;
+    const acc = Array.isArray(rows) ? rows[0] ?? null : rows;
+    return acc as { account_number: string; full_name: string; account_type: string } | null;
   });
