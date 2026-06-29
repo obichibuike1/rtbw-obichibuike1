@@ -10,7 +10,7 @@ export const sendTransfer = createServerFn({ method: "POST" })
     z.object({
       recipientAccountNumber: z.string().trim().min(4).max(32),
       amount: z.number().positive().max(1_000_000),
-      note: z.string().trim().max(200).optional().nullable(),
+      note: z.string().trim().max(200).optional(),
     }).parse(data),
   )
   .handler(async ({ data, context }) => {
