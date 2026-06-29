@@ -172,6 +172,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      lookup_recipient: {
+        Args: { _account_number: string }
+        Returns: {
+          account_number: string
+          account_type: string
+          full_name: string
+        }[]
+      }
       simulate_tick: { Args: never; Returns: Json }
     }
     Enums: {
