@@ -13,12 +13,6 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({ component: AdminLayout });
 
-const items = [
-  { title: "Live Monitor", url: "/admin/dashboard", icon: Activity },
-  { title: "Fraud Detection", url: "/admin/fraud", icon: ShieldAlert },
-  { title: "Accounts", url: "/admin/accounts", icon: Users },
-  { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
-];
 
 const items = [
   { title: "Live Monitor", url: "/admin/dashboard", icon: Activity },
