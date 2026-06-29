@@ -5,7 +5,7 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Activity, ShieldAlert, Users, BarChart3, LogOut } from "lucide-react";
+import { Activity, ShieldAlert, Users, BarChart3, LogOut, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tickSimulator } from "@/lib/banking.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,23 +13,25 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({ component: AdminLayout });
 
+
 const items = [
   { title: "Live Monitor", url: "/admin/dashboard", icon: Activity },
   { title: "Fraud Detection", url: "/admin/fraud", icon: ShieldAlert },
+  { title: "Security Events", url: "/admin/security", icon: ShieldCheck },
   { title: "Accounts", url: "/admin/accounts", icon: Users },
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
 ];
 
 function AdminLayout() {
-  const { role, loading, signOut, user } = useAuth();
+  const { role, loading, roleLoading, signOut, user } = useAuth();
   const nav = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || roleLoading) return;
     if (!user) nav({ to: "/auth" });
     else if (role !== "admin") nav({ to: "/app/dashboard" });
-  }, [role, user, loading, nav]);
+  }, [role, user, loading, roleLoading, nav]);
 
   // Background simulator: fires while admin is in the app
   useEffect(() => {
@@ -58,7 +60,7 @@ function AdminLayout() {
     return () => { supabase.removeChannel(ch); };
   }, [role]);
 
-  if (loading || role !== "admin") return null;
+  if (loading || roleLoading || role !== "admin") return null;
 
   return (
     <div className="admin-theme">

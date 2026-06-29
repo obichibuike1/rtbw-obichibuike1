@@ -21,9 +21,12 @@ export type Database = {
           balance: number
           created_at: string
           customer_id: string | null
+          failed_pin_attempts: number
           full_name: string
           id: string
           is_system: boolean
+          pin_locked_until: string | null
+          transfer_pin_hash: string | null
         }
         Insert: {
           account_number: string
@@ -31,9 +34,12 @@ export type Database = {
           balance?: number
           created_at?: string
           customer_id?: string | null
+          failed_pin_attempts?: number
           full_name: string
           id?: string
           is_system?: boolean
+          pin_locked_until?: string | null
+          transfer_pin_hash?: string | null
         }
         Update: {
           account_number?: string
@@ -41,27 +47,66 @@ export type Database = {
           balance?: number
           created_at?: string
           customer_id?: string | null
+          failed_pin_attempts?: number
           full_name?: string
           id?: string
           is_system?: boolean
+          pin_locked_until?: string | null
+          transfer_pin_hash?: string | null
         }
         Relationships: []
       }
       profiles: {
         Row: {
           created_at: string
+          failed_login_attempts: number
           full_name: string
           id: string
+          login_locked_until: string | null
         }
         Insert: {
           created_at?: string
+          failed_login_attempts?: number
           full_name?: string
           id: string
+          login_locked_until?: string | null
         }
         Update: {
           created_at?: string
+          failed_login_attempts?: number
           full_name?: string
           id?: string
+          login_locked_until?: string | null
+        }
+        Relationships: []
+      }
+      security_events: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          details: Json
+          email: string | null
+          event_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          details?: Json
+          email?: string | null
+          event_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          details?: Json
+          email?: string | null
+          event_type?: string
+          id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -145,6 +190,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_login_lock: { Args: { _email: string }; Returns: Json }
       evaluate_fraud: {
         Args: { _account_id: string; _amount: number; _location: string }
         Returns: {
@@ -172,6 +218,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_cap_rejection: {
+        Args: {
+          _attempted_amount: number
+          _balance: number
+          _cap: number
+          _recipient: string
+        }
+        Returns: undefined
+      }
       lookup_recipient: {
         Args: { _account_number: string }
         Returns: {
@@ -180,7 +235,10 @@ export type Database = {
           full_name: string
         }[]
       }
+      register_failed_login: { Args: { _email: string }; Returns: Json }
+      register_successful_login: { Args: never; Returns: undefined }
       simulate_tick: { Args: never; Returns: Json }
+      verify_transfer_pin: { Args: { _pin: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "customer"
