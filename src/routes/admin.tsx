@@ -54,7 +54,7 @@ function AdminLayout() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "transactions" }, (payload) => {
         const t = payload.new as any;
         if (t.status === "flagged") {
-          toast.warning("Flagged transaction", { description: `${t.reason_flagged} · $${t.amount}` });
+          toast.warning("Flagged transaction", { description: `${t.reason_flagged} · ${money(t.amount)}` });
         }
       }).subscribe();
     return () => { supabase.removeChannel(ch); };
