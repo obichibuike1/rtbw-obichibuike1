@@ -13,17 +13,17 @@ const tabs = [
 ];
 
 function CustomerLayout() {
-  const { role, user, loading } = useAuth();
+  const { role, user, loading, roleLoading } = useAuth();
   const nav = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || roleLoading) return;
     if (!user) nav({ to: "/auth" });
     else if (role !== "customer") nav({ to: "/admin/dashboard" });
-  }, [user, role, loading, nav]);
+  }, [user, role, loading, roleLoading, nav]);
 
-  if (loading || role !== "customer") return null;
+  if (loading || roleLoading || role !== "customer") return null;
 
   return (
     <div className="min-h-screen bg-background flex flex-col mx-auto max-w-md w-full pb-20">
