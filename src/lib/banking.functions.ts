@@ -15,7 +15,7 @@ export const sendTransfer = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const location = CITIES[Math.floor(Math.random() * CITIES.length)];
-    const { data: result, error } = await context.supabase.rpc("execute_transfer", {
+    const { data: result, error } = await (context.supabase.rpc as any)("execute_transfer", {
       _recipient_account_number: data.recipientAccountNumber,
       _amount: data.amount,
       _note: data.note ?? null,
