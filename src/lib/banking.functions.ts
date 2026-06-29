@@ -44,10 +44,7 @@ export const seedDemo = createServerFn({ method: "POST" }).handler(async () => {
     { email: "eve@demo.bank", password: "Customer123!", full_name: "Eve Thompson", role: "customer" as const },
   ];
 
-  const created: { email: string; id: string; role: string }[] = [];
-
   for (const u of users) {
-    // try fetch existing
     const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
     let existing = list?.users.find((x) => x.email === u.email);
     if (!existing) {
@@ -57,9 +54,7 @@ export const seedDemo = createServerFn({ method: "POST" }).handler(async () => {
       if (ce) throw new Error(`createUser ${u.email}: ${ce.message}`);
       existing = cu.user!;
     }
-    // role
     await supabaseAdmin.from("user_roles").upsert({ user_id: existing.id, role: u.role }, { onConflict: "user_id,role" });
-    // profile
     await supabaseAdmin.from("profiles").upsert({ id: existing.id, full_name: u.full_name });
 
     if (u.role === "customer") {
@@ -75,10 +70,10 @@ export const seedDemo = createServerFn({ method: "POST" }).handler(async () => {
         });
       }
     }
-    created.push({ email: u.email, id: existing.id, role: u.role });
   }
 
-  return { ok: true, users: created };
+  // Do NOT return the user list — keeps demo emails out of the client/network response.
+  return { ok: true };
 });
 
 export const lookupRecipient = createServerFn({ method: "POST" })
@@ -91,4 +86,66 @@ export const lookupRecipient = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const acc = Array.isArray(rows) ? rows[0] ?? null : rows;
     return acc as { account_number: string; full_name: string; account_type: string } | null;
+  });
+
+// ---- Security: login lockout ----
+
+export const checkLoginLock = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ email: z.string().trim().email().max(255) }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: r, error } = await (supabaseAdmin.rpc as any)("check_login_lock", { _email: data.email });
+    if (error) throw new Error(error.message);
+    return r as { locked: boolean; until?: string };
+  });
+
+export const registerFailedLogin = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ email: z.string().trim().email().max(255) }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: r, error } = await (supabaseAdmin.rpc as any)("register_failed_login", { _email: data.email });
+    if (error) throw new Error(error.message);
+    return r as { attempts: number; locked: boolean; until?: string };
+  });
+
+export const registerSuccessfulLogin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { error } = await (context.supabase.rpc as any)("register_successful_login");
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---- Security: PIN lockout ----
+
+export const verifyTransferPin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ pin: z.string().trim().min(4).max(12) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: r, error } = await (context.supabase.rpc as any)("verify_transfer_pin", { _pin: data.pin });
+    if (error) throw new Error(error.message);
+    return r as { ok: boolean; locked?: boolean; until?: string; attempts?: number; remaining?: number };
+  });
+
+// ---- Security: 90% cap rejection log ----
+
+export const logCapRejection = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      attemptedAmount: z.number().nonnegative(),
+      balance: z.number().nonnegative(),
+      cap: z.number().nonnegative(),
+      recipient: z.string().trim().max(64).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await (context.supabase.rpc as any)("log_cap_rejection", {
+      _attempted_amount: data.attemptedAmount,
+      _balance: data.balance,
+      _cap: data.cap,
+      _recipient: data.recipient ?? null,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
