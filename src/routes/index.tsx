@@ -7,12 +7,13 @@ import { Activity, ShieldCheck, Smartphone, Zap } from "lucide-react";
 export const Route = createFileRoute("/")({ component: Landing });
 
 function Landing() {
-  const { role, loading } = useAuth();
+  const { role, loading, roleLoading } = useAuth();
   const nav = useNavigate();
   useEffect(() => {
-    if (!loading && role === "admin") nav({ to: "/admin/dashboard" });
-    else if (!loading && role === "customer") nav({ to: "/app/dashboard" });
-  }, [role, loading, nav]);
+    if (loading || roleLoading) return;
+    if (role === "admin") nav({ to: "/admin/dashboard" });
+    else if (role === "customer") nav({ to: "/app/dashboard" });
+  }, [role, loading, roleLoading, nav]);
 
   return (
     <div className="min-h-screen">
