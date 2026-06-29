@@ -5,7 +5,7 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Activity, ShieldAlert, Users, BarChart3, LogOut } from "lucide-react";
+import { Activity, ShieldAlert, Users, BarChart3, LogOut, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tickSimulator } from "@/lib/banking.functions";
 import { supabase } from "@/integrations/supabase/client";
