@@ -27,7 +27,7 @@ export const sendTransfer = createServerFn({ method: "POST" })
 
 export const tickSimulator = createServerFn({ method: "POST" }).handler(async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin.rpc("simulate_tick");
+  const { data, error } = await (supabaseAdmin.rpc as any)("simulate_tick");
   if (error) throw new Error(error.message);
   return data;
 });
