@@ -14,16 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      accounts: {
+        Row: {
+          account_number: string
+          account_type: string
+          balance: number
+          created_at: string
+          customer_id: string | null
+          full_name: string
+          id: string
+          is_system: boolean
+        }
+        Insert: {
+          account_number: string
+          account_type?: string
+          balance?: number
+          created_at?: string
+          customer_id?: string | null
+          full_name: string
+          id?: string
+          is_system?: boolean
+        }
+        Update: {
+          account_number?: string
+          account_type?: string
+          balance?: number
+          created_at?: string
+          customer_id?: string | null
+          full_name?: string
+          id?: string
+          is_system?: boolean
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          id: string
+          initiated_by: Database["public"]["Enums"]["tx_initiator"]
+          location: string | null
+          note: string | null
+          reason_flagged: string | null
+          related_account_id: string | null
+          status: Database["public"]["Enums"]["tx_status"]
+          timestamp: string
+          type: Database["public"]["Enums"]["tx_type"]
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          id?: string
+          initiated_by?: Database["public"]["Enums"]["tx_initiator"]
+          location?: string | null
+          note?: string | null
+          reason_flagged?: string | null
+          related_account_id?: string | null
+          status?: Database["public"]["Enums"]["tx_status"]
+          timestamp?: string
+          type: Database["public"]["Enums"]["tx_type"]
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          id?: string
+          initiated_by?: Database["public"]["Enums"]["tx_initiator"]
+          location?: string | null
+          note?: string | null
+          reason_flagged?: string | null
+          related_account_id?: string | null
+          status?: Database["public"]["Enums"]["tx_status"]
+          timestamp?: string
+          type?: Database["public"]["Enums"]["tx_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_related_account_id_fkey"
+            columns: ["related_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      evaluate_fraud: {
+        Args: { _account_id: string; _amount: number; _location: string }
+        Returns: {
+          reason: string
+          status: Database["public"]["Enums"]["tx_status"]
+        }[]
+      }
+      execute_transfer: {
+        Args: {
+          _amount: number
+          _location: string
+          _note: string
+          _recipient_account_number: string
+        }
+        Returns: Json
+      }
+      get_my_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      simulate_tick: { Args: never; Returns: Json }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "customer"
+      tx_initiator: "system" | "customer"
+      tx_status: "normal" | "flagged"
+      tx_type: "deposit" | "withdrawal" | "transfer_out" | "transfer_in"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +305,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "customer"],
+      tx_initiator: ["system", "customer"],
+      tx_status: ["normal", "flagged"],
+      tx_type: ["deposit", "withdrawal", "transfer_out", "transfer_in"],
+    },
   },
 } as const
