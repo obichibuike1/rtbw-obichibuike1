@@ -18,6 +18,7 @@ import { Route as AppSendRouteImport } from './routes/app.send'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AppAlertsRouteImport } from './routes/app.alerts'
+import { Route as AdminSecurityRouteImport } from './routes/admin.security'
 import { Route as AdminFraudRouteImport } from './routes/admin.fraud'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
@@ -68,6 +69,11 @@ const AppAlertsRoute = AppAlertsRouteImport.update({
   path: '/alerts',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminSecurityRoute = AdminSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminFraudRoute = AdminFraudRouteImport.update({
   id: '/fraud',
   path: '/fraud',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fraud': typeof AdminFraudRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/app/alerts': typeof AppAlertsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/profile': typeof AppProfileRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fraud': typeof AdminFraudRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/app/alerts': typeof AppAlertsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/profile': typeof AppProfileRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fraud': typeof AdminFraudRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/app/alerts': typeof AppAlertsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/profile': typeof AppProfileRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/dashboard'
     | '/admin/fraud'
+    | '/admin/security'
     | '/app/alerts'
     | '/app/dashboard'
     | '/app/profile'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/dashboard'
     | '/admin/fraud'
+    | '/admin/security'
     | '/app/alerts'
     | '/app/dashboard'
     | '/app/profile'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/dashboard'
     | '/admin/fraud'
+    | '/admin/security'
     | '/app/alerts'
     | '/app/dashboard'
     | '/app/profile'
@@ -255,6 +267,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAlertsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/security': {
+      id: '/admin/security'
+      path: '/security'
+      fullPath: '/admin/security'
+      preLoaderRoute: typeof AdminSecurityRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/fraud': {
       id: '/admin/fraud'
       path: '/fraud'
@@ -291,6 +310,7 @@ interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminFraudRoute: typeof AdminFraudRoute
+  AdminSecurityRoute: typeof AdminSecurityRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -298,6 +318,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminFraudRoute: AdminFraudRoute,
+  AdminSecurityRoute: AdminSecurityRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
