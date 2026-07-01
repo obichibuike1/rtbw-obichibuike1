@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { fullTime } from "@/lib/format";
-import { Ban, KeyRound, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Ban, Copy, KeyRound, Mail, ShieldAlert, ShieldCheck, ShieldQuestion } from "lucide-react";
 
 export const Route = createFileRoute("/admin/security")({ component: SecurityFeed });
 
 type Evt = {
   id: string;
-  event_type: "login_lockout" | "pin_lockout" | "cap_rejection" | string;
+  event_type: string;
   email: string | null;
   user_id: string | null;
   account_id: string | null;
@@ -111,32 +111,57 @@ function describe(e: Evt) {
   switch (e.event_type) {
     case "login_lockout":
       return {
-        title: "Login lockout",
-        tag: "LOGIN",
-        variant: "destructive" as const,
-        icon: ShieldAlert,
+        title: "Login lockout", tag: "LOGIN", variant: "destructive" as const, icon: ShieldAlert,
         body: `Account locked for ${e.details?.duration_seconds ?? 60}s after repeated failed sign-in attempts.`,
       };
     case "pin_lockout":
       return {
-        title: "Transfer PIN lockout",
-        tag: "PIN",
-        variant: "destructive" as const,
-        icon: KeyRound,
+        title: "Transfer PIN lockout", tag: "PIN", variant: "destructive" as const, icon: KeyRound,
         body: `Transfers disabled for ${e.details?.duration_seconds ?? 120}s after repeated incorrect PIN entries.`,
       };
     case "cap_rejection":
       return {
-        title: "90% cap rejection",
-        tag: "CAP",
-        variant: "secondary" as const,
-        icon: Ban,
+        title: "90% cap rejection", tag: "CAP", variant: "secondary" as const, icon: Ban,
         body: `Attempted ${fmt(e.details?.attempted_amount)} · balance ${fmt(e.details?.balance)} · cap ${fmt(e.details?.cap)}${e.details?.recipient ? ` → ${e.details.recipient}` : ""}.`,
+      };
+    case "duplicate_attempt":
+      return {
+        title: "Duplicate transfer attempt",
+        tag: "DUPLICATE",
+        variant: (e.details?.resolution === "confirmed" ? "destructive" : "secondary") as any,
+        icon: Copy,
+        body: `${e.details?.resolution === "confirmed" ? "Sent anyway" : "Cancelled"} · ${fmt(e.details?.amount)} → ${e.details?.recipient_name ?? e.details?.recipient_account ?? "—"} (repeat within ${e.details?.seconds_ago ?? 0}s).`,
+      };
+    case "security_challenge_triggered":
+      return {
+        title: "Security question challenged", tag: "80% CHECK", variant: "secondary" as const, icon: ShieldQuestion,
+        body: `Triggered on transfer of ${fmt(e.details?.amount)} (${e.details?.percent ?? "?"}% of balance ${fmt(e.details?.balance)}).`,
+      };
+    case "security_challenge_passed":
+      return {
+        title: "Security question passed", tag: "PASSED", variant: "secondary" as const, icon: ShieldCheck,
+        body: `Correct answer on transfer of ${fmt(e.details?.amount)} (${e.details?.percent ?? "?"}% of balance).`,
+      };
+    case "security_challenge_failed":
+      return {
+        title: "Security question failed", tag: "FAILED", variant: "destructive" as const, icon: ShieldQuestion,
+        body: `Wrong answer on ${fmt(e.details?.amount)} transfer — ${e.details?.remaining ?? 0} attempt(s) remaining.`,
+      };
+    case "security_challenge_locked":
+      return {
+        title: "HIGH VALUE ALERT — Send Money locked", tag: "HIGH VALUE ALERT", variant: "destructive" as const, icon: ShieldAlert,
+        body: `Security question failed on high-value transfer attempt (${fmt(e.details?.amount)}). Send Money locked for ${Math.round((e.details?.duration_seconds ?? 300) / 60)} minutes.`,
+      };
+    case "password_reset_request":
+      return {
+        title: "Password reset requested", tag: "RESET", variant: "secondary" as const, icon: Mail,
+        body: `Reset link sent to ${e.details?.masked_email ?? e.email ?? "—"}.`,
       };
     default:
       return { title: e.event_type, tag: "EVENT", variant: "secondary" as const, icon: ShieldCheck, body: JSON.stringify(e.details) };
   }
 }
+
 
 function fmt(n: any) {
   const v = Number(n);

@@ -11,6 +11,7 @@ export const sendTransfer = createServerFn({ method: "POST" })
       recipientAccountNumber: z.string().trim().min(4).max(32),
       amount: z.number().positive().max(1_000_000),
       note: z.string().trim().max(200).optional(),
+      confirmDuplicate: z.boolean().optional(),
     }).parse(data),
   )
   .handler(async ({ data, context }) => {
@@ -20,9 +21,122 @@ export const sendTransfer = createServerFn({ method: "POST" })
       _amount: data.amount,
       _note: data.note ?? null,
       _location: location,
+      _confirm_duplicate: data.confirmDuplicate ?? false,
+    });
+    if (error) {
+      // surface duplicate detection specially so client can show its modal
+      if (error.message?.includes("DUPLICATE_DETECTED")) {
+        const m = error.message.match(/DUPLICATE_DETECTED:(\d+)/);
+        const err: any = new Error("DUPLICATE_DETECTED");
+        err.code = "DUPLICATE_DETECTED";
+        err.secondsAgo = m ? Number(m[1]) : 0;
+        throw err;
+      }
+      throw new Error(error.message);
+    }
+    return result as { out_tx: string; in_tx: string; status: "normal" | "flagged"; reason: string | null; duplicate_confirmed?: boolean };
+  });
+
+export const checkDuplicateTransfer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    recipientAccountNumber: z.string().trim().min(4).max(32),
+    amount: z.number().positive(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: r, error } = await (context.supabase.rpc as any)("check_duplicate_transfer", {
+      _recipient_account_number: data.recipientAccountNumber,
+      _amount: data.amount,
     });
     if (error) throw new Error(error.message);
-    return result as { out_tx: string; in_tx: string; status: "normal" | "flagged"; reason: string | null };
+    return r as { found: boolean; seconds_ago?: number; recipient_name?: string; recipient_account?: string; amount?: number };
+  });
+
+export const logDuplicateAttempt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    recipientAccountNumber: z.string().trim().min(4).max(32),
+    amount: z.number().positive(),
+    resolution: z.enum(["confirmed", "cancelled"]),
+    secondsAgo: z.number().int().nonnegative(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await (context.supabase.rpc as any)("log_duplicate_attempt", {
+      _recipient_account_number: data.recipientAccountNumber,
+      _amount: data.amount,
+      _resolution: data.resolution,
+      _seconds_ago: data.secondsAgo,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---- Security question ----
+
+export const getMySecurityQuestion = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await (context.supabase.rpc as any)("get_my_security_question");
+    if (error) throw new Error(error.message);
+    return { question: (data as string | null) ?? null };
+  });
+
+export const setSecurityQuestion = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    question: z.string().trim().min(3).max(200),
+    answer: z.string().trim().min(1).max(200),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await (context.supabase.rpc as any)("set_security_question", {
+      _question: data.question,
+      _answer: data.answer,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const verifySecurityAnswer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    answer: z.string().trim().min(1).max(200),
+    amount: z.number().nonnegative(),
+    balance: z.number().nonnegative(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: r, error } = await (context.supabase.rpc as any)("verify_security_answer", {
+      _answer: data.answer,
+      _amount: data.amount,
+      _balance: data.balance,
+    });
+    if (error) throw new Error(error.message);
+    return r as { ok: boolean; locked?: boolean; until?: string; attempts?: number; remaining?: number };
+  });
+
+export const logSecurityChallengeTriggered = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    amount: z.number().nonnegative(),
+    balance: z.number().nonnegative(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await (context.supabase.rpc as any)("log_security_challenge_triggered", {
+      _amount: data.amount,
+      _balance: data.balance,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---- Password reset logging (server-side, uses admin client) ----
+
+export const logPasswordReset = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ email: z.string().trim().email().max(255) }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await (supabaseAdmin.rpc as any)("log_password_reset", { _email: data.email });
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const tickSimulator = createServerFn({ method: "POST" }).handler(async () => {

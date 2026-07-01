@@ -26,6 +26,7 @@ export type Database = {
           id: string
           is_system: boolean
           pin_locked_until: string | null
+          send_locked_until: string | null
           transfer_pin_hash: string | null
         }
         Insert: {
@@ -39,6 +40,7 @@ export type Database = {
           id?: string
           is_system?: boolean
           pin_locked_until?: string | null
+          send_locked_until?: string | null
           transfer_pin_hash?: string | null
         }
         Update: {
@@ -52,6 +54,7 @@ export type Database = {
           id?: string
           is_system?: boolean
           pin_locked_until?: string | null
+          send_locked_until?: string | null
           transfer_pin_hash?: string | null
         }
         Relationships: []
@@ -60,23 +63,32 @@ export type Database = {
         Row: {
           created_at: string
           failed_login_attempts: number
+          failed_security_attempts: number
           full_name: string
           id: string
           login_locked_until: string | null
+          security_answer_hash: string | null
+          security_question: string | null
         }
         Insert: {
           created_at?: string
           failed_login_attempts?: number
+          failed_security_attempts?: number
           full_name?: string
           id: string
           login_locked_until?: string | null
+          security_answer_hash?: string | null
+          security_question?: string | null
         }
         Update: {
           created_at?: string
           failed_login_attempts?: number
+          failed_security_attempts?: number
           full_name?: string
           id?: string
           login_locked_until?: string | null
+          security_answer_hash?: string | null
+          security_question?: string | null
         }
         Relationships: []
       }
@@ -114,6 +126,7 @@ export type Database = {
         Row: {
           account_id: string
           amount: number
+          duplicate_confirmed: boolean
           id: string
           initiated_by: Database["public"]["Enums"]["tx_initiator"]
           location: string | null
@@ -127,6 +140,7 @@ export type Database = {
         Insert: {
           account_id: string
           amount: number
+          duplicate_confirmed?: boolean
           id?: string
           initiated_by?: Database["public"]["Enums"]["tx_initiator"]
           location?: string | null
@@ -140,6 +154,7 @@ export type Database = {
         Update: {
           account_id?: string
           amount?: number
+          duplicate_confirmed?: boolean
           id?: string
           initiated_by?: Database["public"]["Enums"]["tx_initiator"]
           location?: string | null
@@ -190,6 +205,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_duplicate_transfer: {
+        Args: { _amount: number; _recipient_account_number: string }
+        Returns: Json
+      }
       check_login_lock: { Args: { _email: string }; Returns: Json }
       evaluate_fraud: {
         Args: { _account_id: string; _amount: number; _location: string }
@@ -201,6 +220,7 @@ export type Database = {
       execute_transfer: {
         Args: {
           _amount: number
+          _confirm_duplicate?: boolean
           _location: string
           _note: string
           _recipient_account_number: string
@@ -211,6 +231,7 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_my_security_question: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -227,6 +248,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      log_duplicate_attempt: {
+        Args: {
+          _amount: number
+          _recipient_account_number: string
+          _resolution: string
+          _seconds_ago: number
+        }
+        Returns: undefined
+      }
+      log_password_reset: { Args: { _email: string }; Returns: undefined }
+      log_security_challenge_triggered: {
+        Args: { _amount: number; _balance: number }
+        Returns: undefined
+      }
       lookup_recipient: {
         Args: { _account_number: string }
         Returns: {
@@ -237,7 +272,15 @@ export type Database = {
       }
       register_failed_login: { Args: { _email: string }; Returns: Json }
       register_successful_login: { Args: never; Returns: undefined }
+      set_security_question: {
+        Args: { _answer: string; _question: string }
+        Returns: undefined
+      }
       simulate_tick: { Args: never; Returns: Json }
+      verify_security_answer: {
+        Args: { _amount: number; _answer: string; _balance: number }
+        Returns: Json
+      }
       verify_transfer_pin: { Args: { _pin: string }; Returns: Json }
     }
     Enums: {
