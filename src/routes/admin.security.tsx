@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { fullTime } from "@/lib/format";
-import { Ban, KeyRound, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Ban, Copy, KeyRound, Mail, ShieldAlert, ShieldCheck, ShieldQuestion } from "lucide-react";
 
 export const Route = createFileRoute("/admin/security")({ component: SecurityFeed });
 
 type Evt = {
   id: string;
-  event_type: "login_lockout" | "pin_lockout" | "cap_rejection" | string;
+  event_type: string;
   email: string | null;
   user_id: string | null;
   account_id: string | null;
