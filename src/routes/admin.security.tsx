@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { fullTime, money } from "@/lib/format";
+import { fullTime } from "@/lib/format";
 import { Ban, Copy, KeyRound, Mail, ShieldAlert, ShieldCheck, ShieldQuestion } from "lucide-react";
 
 export const Route = createFileRoute("/admin/security")({ component: SecurityFeed });
