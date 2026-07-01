@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { fullTime, money } from "@/lib/format";
 import { Ban, Copy, KeyRound, Mail, ShieldAlert, ShieldCheck, ShieldQuestion } from "lucide-react";
-import { Ban, Copy, KeyRound, Mail, ShieldAlert, ShieldCheck, ShieldQuestion } from "lucide-react";
 
 export const Route = createFileRoute("/admin/security")({ component: SecurityFeed });
 
