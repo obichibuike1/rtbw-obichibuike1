@@ -49,12 +49,17 @@ function AdminDashboard() {
         <p className="text-sm text-muted-foreground">Real-time transaction stream across all accounts.</p>
       </div>
 
+      <SecurityOverview />
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Stat icon={Activity} label="Transactions today" value={String(todayStats.count)} />
         <Stat icon={BanknoteArrowUp} label="Volume processed" value={money(todayStats.volume)} />
         <Stat icon={AlertTriangle} label="Flagged" value={String(todayStats.flagged)} accent="destructive" />
         <Stat icon={TrendingUp} label="Avg tx value" value={money(todayStats.avg)} />
       </div>
+
+      <ThreatTimeline />
+
 
       <Card>
         <CardHeader><CardTitle className="text-base">Volume — last {chartData.length || 0} minutes</CardTitle></CardHeader>
