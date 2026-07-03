@@ -20,6 +20,7 @@ import {
 } from "@/lib/banking.functions";
 import { useMyAccount } from "@/lib/use-my-account";
 import { money } from "@/lib/format";
+import { detectPhishing, detectSql, detectXss, logSocEvent, stripUrls } from "@/lib/soc";
 
 export const Route = createFileRoute("/app/send")({ component: SendMoney });
 
@@ -39,6 +40,10 @@ function SendMoney() {
   const [receipt, setReceipt] = useState<any>(null);
   const [amountError, setAmountError] = useState<string | null>(null);
   const [pinError, setPinError] = useState<string | null>(null);
+  const [noteError, setNoteError] = useState<string | null>(null);
+  const [lookupError, setLookupError] = useState<string | null>(null);
+  const failedLookupsRef = useRef<number>(0);
+  const dupAttemptRef = useRef<Array<{ acc: string; amt: number; t: number }>>([]);
 
   // Duplicate detection modal
   const [dupInfo, setDupInfo] = useState<{ secondsAgo: number; amount: number } | null>(null);
@@ -129,12 +134,39 @@ function SendMoney() {
 
   const doLookup = async () => {
     if (!acc.trim()) return;
+    setLookupError(null);
+    // XSS/SQL scan on the account number field
+    const xss = detectXss(acc); const sql = detectSql(acc);
+    if (xss.hit || sql.hit) {
+      await logSocEvent({
+        threat_type: xss.hit ? "xss" : "sql_injection", severity: "red",
+        field: "send.recipient", payload: (xss.match ?? sql.match) as string,
+      });
+      setLookupError("Invalid characters detected. Please enter plain text only.");
+      return;
+    }
     try {
       const r = await lookupRecipient({ data: { accountNumber: acc.trim() } });
-      if (!r) { toast.error("No account found"); setRecipient(null); return; }
+      if (!r) {
+        failedLookupsRef.current++;
+        await logSocEvent({
+          threat_type: "enumeration", severity: "orange", field: "send.recipient",
+          payload: `Failed lookup: ${acc.trim()}`, details: { attempts: failedLookupsRef.current },
+        });
+        if (failedLookupsRef.current >= 3) {
+          setLookupError("Too many failed searches. Please try again in 5 minutes.");
+          setTimeout(() => { failedLookupsRef.current = 0; setLookupError(null); }, 5 * 60_000);
+        } else {
+          toast.error("No account found");
+        }
+        setRecipient(null);
+        return;
+      }
+      failedLookupsRef.current = 0;
       setRecipient(r as any);
     } catch (e: any) { toast.error(e.message ?? "Lookup failed"); }
   };
+
 
   // Actually run the transfer (called by submit or by "Yes, Send Anyway")
   const performTransfer = async (opts: { confirmDuplicate?: boolean } = {}) => {
@@ -174,6 +206,49 @@ function SendMoney() {
     if (!recipient) { toast.error("Look up the recipient first"); return; }
     if (!amt || amt <= 0) { setAmountError("Enter a valid amount"); return; }
 
+    // XSS/SQL scan on note
+    const xssNote = detectXss(note);
+    const sqlNote = detectSql(note);
+    if (xssNote.hit) {
+      await logSocEvent({ threat_type: "xss", severity: "red", field: "narration", payload: xssNote.match });
+      setNoteError("Invalid characters detected. Please enter plain text only.");
+      setNote("");
+      return;
+    }
+    if (sqlNote.hit) {
+      await logSocEvent({ threat_type: "sql_injection", severity: "red", field: "narration", payload: sqlNote.match });
+      setNoteError("Invalid characters detected. Please enter plain text only.");
+      setNote("");
+      return;
+    }
+    // Phishing URL scan — strip, warn, escalate if large
+    const phish = detectPhishing(note);
+    if (phish.hit) {
+      const isLarge = amt >= balance * 0.5;
+      await logSocEvent({
+        threat_type: "phishing", severity: isLarge ? "red" : "yellow", field: "narration",
+        payload: phish.match, details: { amount: amt, large: isLarge },
+      });
+      setNote(stripUrls(note));
+      setNoteError("URLs are not allowed in transfer notes.");
+      return;
+    }
+
+    // Duplicate-attack detection (4+ same tx to same recipient within 5min)
+    const nowT = Date.now();
+    dupAttemptRef.current = dupAttemptRef.current.filter((r) => nowT - r.t < 5 * 60_000);
+    dupAttemptRef.current.push({ acc: recipient.account_number, amt, t: nowT });
+    const repeats = dupAttemptRef.current.filter((r) => r.acc === recipient.account_number && r.amt === amt).length;
+    if (repeats >= 4) {
+      await logSocEvent({
+        threat_type: "duplicate_attack", severity: "red", field: "send",
+        payload: `${repeats} identical transfers to ${recipient.account_number} within 5min`,
+        details: { recipient: recipient.account_number, amount: amt },
+      });
+      toast.error("Automated duplicate transfer attack detected. Transfers blocked for 10 minutes.");
+      return;
+    }
+
     // 90% rule — block client-side BEFORE any DB write
     if (amt > cap) {
       setAmountError(`You can only transfer up to 90% of your available balance. Maximum allowed: ${money(cap)}`);
@@ -183,6 +258,7 @@ function SendMoney() {
       toast.error("Transfer blocked by 90% cap rule");
       return;
     }
+
 
     // 80% security-question challenge (BEFORE PIN)
     if (!securityPassed && balance > 0 && amt / balance >= 0.8 && amt <= cap) {
@@ -337,6 +413,7 @@ function SendMoney() {
               <Input value={acc} onChange={(e) => { setAcc(e.target.value); setRecipient(null); }} placeholder="ACC12345678" />
               <Button type="button" variant="outline" onClick={doLookup}><Search className="size-4" /></Button>
             </div>
+            {lookupError && <p className="mt-1 text-xs text-destructive">{lookupError}</p>}
             {recipient && (
               <div className="mt-2 p-3 rounded-xl bg-accent text-sm">
                 Sending to <span className="font-semibold">{recipient.full_name}</span> · <span className="font-mono">{recipient.account_number}</span>
@@ -351,8 +428,11 @@ function SendMoney() {
           </div>
           <div>
             <Label>Note (optional)</Label>
-            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="What's it for?" maxLength={200} />
+            <Input value={note} onChange={(e) => { setNote(e.target.value); setNoteError(null); }} placeholder="What's it for?" maxLength={200}
+              className={noteError ? "border-destructive focus-visible:ring-destructive" : ""} />
+            {noteError && <p className="mt-1 text-xs text-destructive">{noteError}</p>}
           </div>
+
           <div>
             <Label>Transfer PIN</Label>
             <Input type="password" inputMode="numeric" pattern="\d*" maxLength={6}

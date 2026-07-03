@@ -19,9 +19,12 @@ import { Route as AppSendRouteImport } from './routes/app.send'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AppAlertsRouteImport } from './routes/app.alerts'
+import { Route as AdminSocRouteImport } from './routes/admin.soc'
 import { Route as AdminSecurityRouteImport } from './routes/admin.security'
+import { Route as AdminIpsRouteImport } from './routes/admin.ips'
 import { Route as AdminFraudRouteImport } from './routes/admin.fraud'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminControlRouteImport } from './routes/admin.control'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAccountsRouteImport } from './routes/admin.accounts'
 
@@ -75,9 +78,19 @@ const AppAlertsRoute = AppAlertsRouteImport.update({
   path: '/alerts',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminSocRoute = AdminSocRouteImport.update({
+  id: '/soc',
+  path: '/soc',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSecurityRoute = AdminSecurityRouteImport.update({
   id: '/security',
   path: '/security',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminIpsRoute = AdminIpsRouteImport.update({
+  id: '/ips',
+  path: '/ips',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminFraudRoute = AdminFraudRouteImport.update({
@@ -88,6 +101,11 @@ const AdminFraudRoute = AdminFraudRouteImport.update({
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminControlRoute = AdminControlRouteImport.update({
+  id: '/control',
+  path: '/control',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
@@ -109,9 +127,12 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/accounts': typeof AdminAccountsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/control': typeof AdminControlRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fraud': typeof AdminFraudRoute
+  '/admin/ips': typeof AdminIpsRoute
   '/admin/security': typeof AdminSecurityRoute
+  '/admin/soc': typeof AdminSocRoute
   '/app/alerts': typeof AppAlertsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/profile': typeof AppProfileRoute
@@ -126,9 +147,12 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/accounts': typeof AdminAccountsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/control': typeof AdminControlRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fraud': typeof AdminFraudRoute
+  '/admin/ips': typeof AdminIpsRoute
   '/admin/security': typeof AdminSecurityRoute
+  '/admin/soc': typeof AdminSocRoute
   '/app/alerts': typeof AppAlertsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/profile': typeof AppProfileRoute
@@ -144,9 +168,12 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/accounts': typeof AdminAccountsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/control': typeof AdminControlRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fraud': typeof AdminFraudRoute
+  '/admin/ips': typeof AdminIpsRoute
   '/admin/security': typeof AdminSecurityRoute
+  '/admin/soc': typeof AdminSocRoute
   '/app/alerts': typeof AppAlertsRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/profile': typeof AppProfileRoute
@@ -163,9 +190,12 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/accounts'
     | '/admin/analytics'
+    | '/admin/control'
     | '/admin/dashboard'
     | '/admin/fraud'
+    | '/admin/ips'
     | '/admin/security'
+    | '/admin/soc'
     | '/app/alerts'
     | '/app/dashboard'
     | '/app/profile'
@@ -180,9 +210,12 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/accounts'
     | '/admin/analytics'
+    | '/admin/control'
     | '/admin/dashboard'
     | '/admin/fraud'
+    | '/admin/ips'
     | '/admin/security'
+    | '/admin/soc'
     | '/app/alerts'
     | '/app/dashboard'
     | '/app/profile'
@@ -197,9 +230,12 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/accounts'
     | '/admin/analytics'
+    | '/admin/control'
     | '/admin/dashboard'
     | '/admin/fraud'
+    | '/admin/ips'
     | '/admin/security'
+    | '/admin/soc'
     | '/app/alerts'
     | '/app/dashboard'
     | '/app/profile'
@@ -287,11 +323,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAlertsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/soc': {
+      id: '/admin/soc'
+      path: '/soc'
+      fullPath: '/admin/soc'
+      preLoaderRoute: typeof AdminSocRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/security': {
       id: '/admin/security'
       path: '/security'
       fullPath: '/admin/security'
       preLoaderRoute: typeof AdminSecurityRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/ips': {
+      id: '/admin/ips'
+      path: '/ips'
+      fullPath: '/admin/ips'
+      preLoaderRoute: typeof AdminIpsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/fraud': {
@@ -306,6 +356,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/control': {
+      id: '/admin/control'
+      path: '/control'
+      fullPath: '/admin/control'
+      preLoaderRoute: typeof AdminControlRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/analytics': {
@@ -328,17 +385,23 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminAccountsRoute: typeof AdminAccountsRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminControlRoute: typeof AdminControlRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminFraudRoute: typeof AdminFraudRoute
+  AdminIpsRoute: typeof AdminIpsRoute
   AdminSecurityRoute: typeof AdminSecurityRoute
+  AdminSocRoute: typeof AdminSocRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAccountsRoute: AdminAccountsRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminControlRoute: AdminControlRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminFraudRoute: AdminFraudRoute,
+  AdminIpsRoute: AdminIpsRoute,
   AdminSecurityRoute: AdminSecurityRoute,
+  AdminSocRoute: AdminSocRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -371,13 +434,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

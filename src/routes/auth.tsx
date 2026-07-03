@@ -56,6 +56,24 @@ function AuthPage() {
   const onSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (lockedUntil && Date.now() < lockedUntil) return;
+
+    // XSS + SQLi scan on credentials (client-side)
+    try {
+      const { detectXss, detectSql, logSocEvent } = await import("@/lib/soc");
+      const xss = detectXss(email) || detectXss(password);
+      if (xss.hit) {
+        await logSocEvent({ threat_type: "xss", severity: "red", field: "login", payload: xss.match, target_email: email });
+        toast.error("Invalid characters detected. Please enter plain text only.");
+        return;
+      }
+      const sql = detectSql(email) || detectSql(password);
+      if (sql.hit) {
+        await logSocEvent({ threat_type: "sql_injection", severity: "red", field: "login", payload: sql.match, target_email: email });
+        toast.error("Invalid characters detected. Please enter plain text only.");
+        return;
+      }
+    } catch {}
+
     setBusy(true);
     try {
       const lock = await checkLoginLock({ data: { email } });
@@ -67,6 +85,18 @@ function AuthPage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         const r = await registerFailedLogin({ data: { email } });
+        // Log brute-force attempts to SOC feed
+        try {
+          const { logSocEvent } = await import("@/lib/soc");
+          await logSocEvent({
+            threat_type: r.attempts >= 5 ? "brute_force" : "credential_stuffing",
+            severity: "orange",
+            field: "login",
+            payload: `Failed login attempt #${r.attempts} for ${email}`,
+            target_email: email,
+            details: { attempts: r.attempts },
+          });
+        } catch {}
         if (r.locked && r.until) {
           setLockedUntil(new Date(r.until).getTime());
           toast.error("Too many failed attempts — locked for 1 minute");
@@ -76,6 +106,7 @@ function AuthPage() {
         }
         return;
       }
+
       try { await registerSuccessfulLogin(); } catch {}
       toast.success("Welcome back");
     } finally {
