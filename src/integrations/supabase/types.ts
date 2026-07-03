@@ -59,6 +59,36 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_ips: {
+        Row: {
+          attack_count: number
+          blocked_by: string
+          first_seen: string
+          ip_address: string
+          last_seen: string
+          permanent: boolean
+          reason: string
+        }
+        Insert: {
+          attack_count?: number
+          blocked_by?: string
+          first_seen?: string
+          ip_address: string
+          last_seen?: string
+          permanent?: boolean
+          reason: string
+        }
+        Update: {
+          attack_count?: number
+          blocked_by?: string
+          first_seen?: string
+          ip_address?: string
+          last_seen?: string
+          permanent?: boolean
+          reason?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -119,6 +149,81 @@ export type Database = {
           event_type?: string
           id?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      soc_events: {
+        Row: {
+          created_at: string
+          details: Json
+          field: string | null
+          fingerprint: string | null
+          id: string
+          ip_address: string | null
+          payload: string | null
+          priority: number
+          reviewed: boolean
+          severity: string
+          simulated: boolean
+          status: string
+          target_account_id: string | null
+          target_email: string | null
+          threat_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          field?: string | null
+          fingerprint?: string | null
+          id?: string
+          ip_address?: string | null
+          payload?: string | null
+          priority?: number
+          reviewed?: boolean
+          severity: string
+          simulated?: boolean
+          status?: string
+          target_account_id?: string | null
+          target_email?: string | null
+          threat_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          field?: string | null
+          fingerprint?: string | null
+          id?: string
+          ip_address?: string | null
+          payload?: string | null
+          priority?: number
+          reviewed?: boolean
+          severity?: string
+          simulated?: boolean
+          status?: string
+          target_account_id?: string | null
+          target_email?: string | null
+          threat_type?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
         }
         Relationships: []
       }
@@ -205,6 +310,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_flag_ip: {
+        Args: { _ip: string; _permanent: boolean; _reason: string }
+        Returns: undefined
+      }
+      admin_set_setting: {
+        Args: { _key: string; _value: Json }
+        Returns: undefined
+      }
+      admin_soc_action: {
+        Args: { _action: string; _event_id: string }
+        Returns: undefined
+      }
+      admin_unblock_ip: { Args: { _ip: string }; Returns: undefined }
       check_duplicate_transfer: {
         Args: { _amount: number; _recipient_account_number: string }
         Returns: Json
@@ -261,6 +379,21 @@ export type Database = {
       log_security_challenge_triggered: {
         Args: { _amount: number; _balance: number }
         Returns: undefined
+      }
+      log_soc_event: {
+        Args: {
+          _details: Json
+          _field: string
+          _fingerprint: string
+          _ip_address: string
+          _payload: string
+          _severity: string
+          _simulated: boolean
+          _target_email: string
+          _threat_type: string
+          _user_agent: string
+        }
+        Returns: string
       }
       lookup_recipient: {
         Args: { _account_number: string }
