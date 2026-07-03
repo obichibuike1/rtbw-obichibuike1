@@ -413,6 +413,7 @@ function SendMoney() {
               <Input value={acc} onChange={(e) => { setAcc(e.target.value); setRecipient(null); }} placeholder="ACC12345678" />
               <Button type="button" variant="outline" onClick={doLookup}><Search className="size-4" /></Button>
             </div>
+            {lookupError && <p className="mt-1 text-xs text-destructive">{lookupError}</p>}
             {recipient && (
               <div className="mt-2 p-3 rounded-xl bg-accent text-sm">
                 Sending to <span className="font-semibold">{recipient.full_name}</span> · <span className="font-mono">{recipient.account_number}</span>
@@ -427,8 +428,11 @@ function SendMoney() {
           </div>
           <div>
             <Label>Note (optional)</Label>
-            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="What's it for?" maxLength={200} />
+            <Input value={note} onChange={(e) => { setNote(e.target.value); setNoteError(null); }} placeholder="What's it for?" maxLength={200}
+              className={noteError ? "border-destructive focus-visible:ring-destructive" : ""} />
+            {noteError && <p className="mt-1 text-xs text-destructive">{noteError}</p>}
           </div>
+
           <div>
             <Label>Transfer PIN</Label>
             <Input type="password" inputMode="numeric" pattern="\d*" maxLength={6}
