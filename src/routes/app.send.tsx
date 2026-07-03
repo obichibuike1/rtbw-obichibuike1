@@ -40,6 +40,10 @@ function SendMoney() {
   const [receipt, setReceipt] = useState<any>(null);
   const [amountError, setAmountError] = useState<string | null>(null);
   const [pinError, setPinError] = useState<string | null>(null);
+  const [noteError, setNoteError] = useState<string | null>(null);
+  const [lookupError, setLookupError] = useState<string | null>(null);
+  const failedLookupsRef = useRef<number>(0);
+  const dupAttemptRef = useRef<Array<{ acc: string; amt: number; t: number }>>([]);
 
   // Duplicate detection modal
   const [dupInfo, setDupInfo] = useState<{ secondsAgo: number; amount: number } | null>(null);
