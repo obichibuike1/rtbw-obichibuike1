@@ -206,6 +206,49 @@ function SendMoney() {
     if (!recipient) { toast.error("Look up the recipient first"); return; }
     if (!amt || amt <= 0) { setAmountError("Enter a valid amount"); return; }
 
+    // XSS/SQL scan on note
+    const xssNote = detectXss(note);
+    const sqlNote = detectSql(note);
+    if (xssNote.hit) {
+      await logSocEvent({ threat_type: "xss", severity: "red", field: "narration", payload: xssNote.match });
+      setNoteError("Invalid characters detected. Please enter plain text only.");
+      setNote("");
+      return;
+    }
+    if (sqlNote.hit) {
+      await logSocEvent({ threat_type: "sql_injection", severity: "red", field: "narration", payload: sqlNote.match });
+      setNoteError("Invalid characters detected. Please enter plain text only.");
+      setNote("");
+      return;
+    }
+    // Phishing URL scan — strip, warn, escalate if large
+    const phish = detectPhishing(note);
+    if (phish.hit) {
+      const isLarge = amt >= balance * 0.5;
+      await logSocEvent({
+        threat_type: "phishing", severity: isLarge ? "red" : "yellow", field: "narration",
+        payload: phish.match, details: { amount: amt, large: isLarge },
+      });
+      setNote(stripUrls(note));
+      setNoteError("URLs are not allowed in transfer notes.");
+      return;
+    }
+
+    // Duplicate-attack detection (4+ same tx to same recipient within 5min)
+    const nowT = Date.now();
+    dupAttemptRef.current = dupAttemptRef.current.filter((r) => nowT - r.t < 5 * 60_000);
+    dupAttemptRef.current.push({ acc: recipient.account_number, amt, t: nowT });
+    const repeats = dupAttemptRef.current.filter((r) => r.acc === recipient.account_number && r.amt === amt).length;
+    if (repeats >= 4) {
+      await logSocEvent({
+        threat_type: "duplicate_attack", severity: "red", field: "send",
+        payload: `${repeats} identical transfers to ${recipient.account_number} within 5min`,
+        details: { recipient: recipient.account_number, amount: amt },
+      });
+      toast.error("Automated duplicate transfer attack detected. Transfers blocked for 10 minutes.");
+      return;
+    }
+
     // 90% rule — block client-side BEFORE any DB write
     if (amt > cap) {
       setAmountError(`You can only transfer up to 90% of your available balance. Maximum allowed: ${money(cap)}`);
@@ -215,6 +258,7 @@ function SendMoney() {
       toast.error("Transfer blocked by 90% cap rule");
       return;
     }
+
 
     // 80% security-question challenge (BEFORE PIN)
     if (!securityPassed && balance > 0 && amt / balance >= 0.8 && amt <= cap) {
