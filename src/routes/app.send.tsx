@@ -134,12 +134,39 @@ function SendMoney() {
 
   const doLookup = async () => {
     if (!acc.trim()) return;
+    setLookupError(null);
+    // XSS/SQL scan on the account number field
+    const xss = detectXss(acc); const sql = detectSql(acc);
+    if (xss.hit || sql.hit) {
+      await logSocEvent({
+        threat_type: xss.hit ? "xss" : "sql_injection", severity: "red",
+        field: "send.recipient", payload: (xss.match ?? sql.match) as string,
+      });
+      setLookupError("Invalid characters detected. Please enter plain text only.");
+      return;
+    }
     try {
       const r = await lookupRecipient({ data: { accountNumber: acc.trim() } });
-      if (!r) { toast.error("No account found"); setRecipient(null); return; }
+      if (!r) {
+        failedLookupsRef.current++;
+        await logSocEvent({
+          threat_type: "enumeration", severity: "orange", field: "send.recipient",
+          payload: `Failed lookup: ${acc.trim()}`, details: { attempts: failedLookupsRef.current },
+        });
+        if (failedLookupsRef.current >= 3) {
+          setLookupError("Too many failed searches. Please try again in 5 minutes.");
+          setTimeout(() => { failedLookupsRef.current = 0; setLookupError(null); }, 5 * 60_000);
+        } else {
+          toast.error("No account found");
+        }
+        setRecipient(null);
+        return;
+      }
+      failedLookupsRef.current = 0;
       setRecipient(r as any);
     } catch (e: any) { toast.error(e.message ?? "Lookup failed"); }
   };
+
 
   // Actually run the transfer (called by submit or by "Yes, Send Anyway")
   const performTransfer = async (opts: { confirmDuplicate?: boolean } = {}) => {
