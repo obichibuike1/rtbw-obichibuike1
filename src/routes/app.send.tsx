@@ -20,6 +20,7 @@ import {
 } from "@/lib/banking.functions";
 import { useMyAccount } from "@/lib/use-my-account";
 import { money } from "@/lib/format";
+import { detectPhishing, detectSql, detectXss, logSocEvent, stripUrls } from "@/lib/soc";
 
 export const Route = createFileRoute("/app/send")({ component: SendMoney });
 
