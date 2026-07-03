@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { money, shortTime, txTypeLabel } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
-import { Activity, AlertTriangle, BanknoteArrowUp, TrendingUp } from "lucide-react";
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Activity, AlertTriangle, BanknoteArrowUp, TrendingUp, ShieldOff, Target, Bug, Timer, Radar } from "lucide-react";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Line, LineChart, Legend } from "recharts";
 
 export const Route = createFileRoute("/admin/dashboard")({ component: AdminDashboard });
+
 
 function AdminDashboard() {
   const { rows, isNew } = useLiveTransactions({ limit: 50 });
