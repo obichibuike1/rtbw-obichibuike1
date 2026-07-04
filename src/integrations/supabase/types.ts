@@ -345,6 +345,10 @@ export type Database = {
         }
         Returns: Json
       }
+      flag_admin_login_attack: {
+        Args: { _attempts: number; _email: string; _ip: string }
+        Returns: undefined
+      }
       get_my_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
@@ -357,6 +361,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin_email: { Args: { _email: string }; Returns: boolean }
       log_cap_rejection: {
         Args: {
           _attempted_amount: number
