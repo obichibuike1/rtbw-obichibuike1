@@ -214,7 +214,7 @@ function AuthPage() {
                 <form onSubmit={onSignUp} className="space-y-3 mt-4">
                   <div><Label>Full name</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
                   <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
-                  <div><Label>Password</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
+                  <div><Label>Password</Label><PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
                   <Button type="submit" disabled={busy} className="w-full">{busy && <Loader2 className="size-4 animate-spin mr-2" />}Create account</Button>
                   <p className="text-xs text-muted-foreground">New sign-ups create a customer account. Admin access is seeded.</p>
                 </form>
