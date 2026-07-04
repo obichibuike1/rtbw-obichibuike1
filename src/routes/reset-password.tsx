@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Loader2 } from "lucide-react";
@@ -57,12 +58,13 @@ function ResetPassword() {
           <form onSubmit={onSubmit} className="space-y-3">
             <div>
               <Label>New password</Label>
-              <Input type="password" value={pw} onChange={(e) => setPw(e.target.value)} minLength={8} required />
+              <PasswordInput value={pw} onChange={(e) => setPw(e.target.value)} minLength={8} required />
             </div>
             <div>
               <Label>Confirm new password</Label>
-              <Input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} minLength={8} required />
+              <PasswordInput value={pw2} onChange={(e) => setPw2(e.target.value)} minLength={8} required />
             </div>
+
             {err && <p className="text-xs text-destructive">{err}</p>}
             <Button type="submit" disabled={busy || !ready} className="w-full">
               {busy && <Loader2 className="size-4 animate-spin mr-2" />}Update password

@@ -37,11 +37,15 @@ function AdminLayout() {
   const simulatorOn = isRuleOn(settings, "rule.transaction_simulator", true);
   const [unreviewed, setUnreviewed] = useState(0);
 
+  const isAuthSurface = pathname === "/admin/login" || pathname === "/admin/reset-password";
+
   useEffect(() => {
+    if (isAuthSurface) return;
     if (loading || roleLoading) return;
-    if (!user) nav({ to: "/auth" });
-    else if (role !== "admin") nav({ to: "/app/dashboard" });
-  }, [role, user, loading, roleLoading, nav]);
+    if (!user) nav({ to: "/admin/login" });
+    else if (role !== "admin") nav({ to: "/admin/login" });
+  }, [role, user, loading, roleLoading, nav, isAuthSurface]);
+
 
   // Threat counter
   useEffect(() => {
@@ -83,7 +87,12 @@ function AdminLayout() {
     return () => { supabase.removeChannel(ch); };
   }, [role]);
 
+  if (isAuthSurface) {
+    return <div className="admin-theme min-h-screen bg-background text-foreground"><Outlet /></div>;
+  }
+
   if (loading || roleLoading || role !== "admin") return null;
+
 
   return (
     <div className="admin-theme">

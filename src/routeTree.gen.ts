@@ -21,6 +21,8 @@ import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AppAlertsRouteImport } from './routes/app.alerts'
 import { Route as AdminSocRouteImport } from './routes/admin.soc'
 import { Route as AdminSecurityRouteImport } from './routes/admin.security'
+import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminIpsRouteImport } from './routes/admin.ips'
 import { Route as AdminFraudRouteImport } from './routes/admin.fraud'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
@@ -88,6 +90,16 @@ const AdminSecurityRoute = AdminSecurityRouteImport.update({
   path: '/security',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminIpsRoute = AdminIpsRouteImport.update({
   id: '/ips',
   path: '/ips',
@@ -131,6 +143,8 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fraud': typeof AdminFraudRoute
   '/admin/ips': typeof AdminIpsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/soc': typeof AdminSocRoute
   '/app/alerts': typeof AppAlertsRoute
@@ -151,6 +165,8 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fraud': typeof AdminFraudRoute
   '/admin/ips': typeof AdminIpsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/soc': typeof AdminSocRoute
   '/app/alerts': typeof AppAlertsRoute
@@ -172,6 +188,8 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fraud': typeof AdminFraudRoute
   '/admin/ips': typeof AdminIpsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/soc': typeof AdminSocRoute
   '/app/alerts': typeof AppAlertsRoute
@@ -194,6 +212,8 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/fraud'
     | '/admin/ips'
+    | '/admin/login'
+    | '/admin/reset-password'
     | '/admin/security'
     | '/admin/soc'
     | '/app/alerts'
@@ -214,6 +234,8 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/fraud'
     | '/admin/ips'
+    | '/admin/login'
+    | '/admin/reset-password'
     | '/admin/security'
     | '/admin/soc'
     | '/app/alerts'
@@ -234,6 +256,8 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/fraud'
     | '/admin/ips'
+    | '/admin/login'
+    | '/admin/reset-password'
     | '/admin/security'
     | '/admin/soc'
     | '/app/alerts'
@@ -337,6 +361,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSecurityRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/reset-password': {
+      id: '/admin/reset-password'
+      path: '/reset-password'
+      fullPath: '/admin/reset-password'
+      preLoaderRoute: typeof AdminResetPasswordRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/ips': {
       id: '/admin/ips'
       path: '/ips'
@@ -389,6 +427,8 @@ interface AdminRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminFraudRoute: typeof AdminFraudRoute
   AdminIpsRoute: typeof AdminIpsRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminResetPasswordRoute: typeof AdminResetPasswordRoute
   AdminSecurityRoute: typeof AdminSecurityRoute
   AdminSocRoute: typeof AdminSocRoute
 }
@@ -400,6 +440,8 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminFraudRoute: AdminFraudRoute,
   AdminIpsRoute: AdminIpsRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminResetPasswordRoute: AdminResetPasswordRoute,
   AdminSecurityRoute: AdminSecurityRoute,
   AdminSocRoute: AdminSocRoute,
 }

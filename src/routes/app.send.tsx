@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { PasswordInput } from "@/components/ui/password-input";
+
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowLeft, Check, Copy, Loader2, Search, Send, ShieldAlert, ShieldQuestion } from "lucide-react";
 import { toast } from "sonner";
@@ -435,9 +437,10 @@ function SendMoney() {
 
           <div>
             <Label>Transfer PIN</Label>
-            <Input type="password" inputMode="numeric" pattern="\d*" maxLength={6}
+            <PasswordInput inputMode="numeric" pattern="\d*" maxLength={6}
               value={pin} onChange={(e) => { setPin(e.target.value.replace(/\D/g, "")); setPinError(null); }}
               placeholder="••••" className="tracking-[0.4em] text-center text-lg h-12 mt-1" />
+
             {pinError && <p className="mt-1 text-xs text-destructive">{pinError}</p>}
             <p className="mt-1 text-[11px] text-muted-foreground">Default demo PIN is <span className="font-mono">1234</span>. 3 wrong PINs lock transfers for 2 minutes.</p>
           </div>
