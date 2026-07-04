@@ -159,3 +159,23 @@
     var(--color-card);
 }
 
+/* Admin login page — animated teal→navy gradient border pulse */
+@keyframes admin-border-pulse {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+.admin-gradient-border {
+  position: relative;
+  border-radius: 0.75rem;
+  padding: 2px;
+  background: linear-gradient(120deg,
+    oklch(0.55 0.14 200) 0%,
+    oklch(0.32 0.08 245) 25%,
+    oklch(0.55 0.14 200) 50%,
+    oklch(0.32 0.08 245) 75%,
+    oklch(0.55 0.14 200) 100%);
+  background-size: 300% 300%;
+  animation: admin-border-pulse 6s ease-in-out infinite;
+}
+
+
