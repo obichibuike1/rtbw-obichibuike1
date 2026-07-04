@@ -177,7 +177,7 @@ function AuthPage() {
                   <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
                   <div>
                     <Label>Password</Label>
-                    <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required />
                     <button
                       type="button"
                       className="mt-1 text-xs text-primary hover:underline"
