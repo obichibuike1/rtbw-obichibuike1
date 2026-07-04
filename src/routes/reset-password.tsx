@@ -58,12 +58,13 @@ function ResetPassword() {
           <form onSubmit={onSubmit} className="space-y-3">
             <div>
               <Label>New password</Label>
-              <Input type="password" value={pw} onChange={(e) => setPw(e.target.value)} minLength={8} required />
+              <PasswordInput value={pw} onChange={(e) => setPw(e.target.value)} minLength={8} required />
             </div>
             <div>
               <Label>Confirm new password</Label>
-              <Input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} minLength={8} required />
+              <PasswordInput value={pw2} onChange={(e) => setPw2(e.target.value)} minLength={8} required />
             </div>
+
             {err && <p className="text-xs text-destructive">{err}</p>}
             <Button type="submit" disabled={busy || !ready} className="w-full">
               {busy && <Loader2 className="size-4 animate-spin mr-2" />}Update password
