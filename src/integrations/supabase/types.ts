@@ -310,10 +310,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_clear_simulated_soc: { Args: never; Returns: number }
       admin_flag_ip: {
         Args: { _ip: string; _permanent: boolean; _reason: string }
         Returns: undefined
       }
+      admin_reset_demo: { Args: never; Returns: Json }
       admin_set_setting: {
         Args: { _key: string; _value: Json }
         Returns: undefined
@@ -362,6 +364,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin_email: { Args: { _email: string }; Returns: boolean }
+      is_rule_on: {
+        Args: { _default?: boolean; _key: string }
+        Returns: boolean
+      }
       log_cap_rejection: {
         Args: {
           _attempted_amount: number
