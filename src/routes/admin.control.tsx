@@ -52,6 +52,21 @@ const SIMS: Array<{ key: string; label: string }> = [
 function ControlPanel() {
   const settings = useSystemSettings();
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [resetting, setResetting] = useState(false);
+
+  const runReset = async () => {
+    setResetting(true);
+    try {
+      const { data, error } = await supabase.rpc("admin_reset_demo" as any);
+      if (error) throw error;
+      const r = (data ?? {}) as any;
+      toast.success(`Demo reset — ${r.soc_cleared ?? 0} SOC events, ${r.ips_cleared ?? 0} IPs cleared, ${r.accounts_reset ?? 0} accounts reset`);
+    } catch (e: any) {
+      toast.error(e.message ?? "Reset failed");
+    } finally {
+      setResetting(false);
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
