@@ -110,9 +110,31 @@ function ControlPanel() {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2"><Activity className="size-6 text-primary" /> System Control Panel</h1>
-          <p className="text-sm text-muted-foreground">Master switches for every detection rule and simulator. Changes persist and apply live.</p>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-semibold flex items-center gap-2"><Activity className="size-6 text-primary" /> System Control Panel</h1>
+            <p className="text-sm text-muted-foreground">Master switches for every detection rule and simulator. Changes persist and apply live.</p>
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" disabled={resetting}>
+                {resetting ? <Loader2 className="size-4 mr-2 animate-spin" /> : <RotateCcw className="size-4 mr-2" />}
+                Reset Demo Data
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset all demo data?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This clears every SOC event, blocked IP, security event, and transaction, resets every customer balance to $50,000, and clears all lockouts and failed-attempt counters. Detection-rule toggles are kept as-is. Use this between demo runs.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={runReset}>Reset everything</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         <Card>
