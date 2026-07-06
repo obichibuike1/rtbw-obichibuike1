@@ -138,8 +138,11 @@ function SendMoney() {
   const doLookup = async () => {
     if (!acc.trim()) return;
     setLookupError(null);
-    // XSS/SQL scan on the account number field
-    const xss = detectXss(acc); const sql = detectSql(acc);
+    // XSS/SQL scan on the account number field (respect toggles)
+    const xssOn = getRuleOn("rule.xss_detection", true);
+    const sqlOn = getRuleOn("rule.sql_injection_detection", true);
+    const xss = xssOn ? detectXss(acc) : { hit: false } as const;
+    const sql = sqlOn ? detectSql(acc) : { hit: false } as const;
     if (xss.hit || sql.hit) {
       await logSocEvent({
         threat_type: xss.hit ? "xss" : "sql_injection", severity: "red",
@@ -152,13 +155,17 @@ function SendMoney() {
       const r = await lookupRecipient({ data: { accountNumber: acc.trim() } });
       if (!r) {
         failedLookupsRef.current++;
-        await logSocEvent({
-          threat_type: "enumeration", severity: "orange", field: "send.recipient",
-          payload: `Failed lookup: ${acc.trim()}`, details: { attempts: failedLookupsRef.current },
-        });
-        if (failedLookupsRef.current >= 3) {
-          setLookupError("Too many failed searches. Please try again in 5 minutes.");
-          setTimeout(() => { failedLookupsRef.current = 0; setLookupError(null); }, 5 * 60_000);
+        if (getRuleOn("rule.enumeration_detection", true)) {
+          await logSocEvent({
+            threat_type: "enumeration", severity: "orange", field: "send.recipient",
+            payload: `Failed lookup: ${acc.trim()}`, details: { attempts: failedLookupsRef.current },
+          });
+          if (failedLookupsRef.current >= 3) {
+            setLookupError("Too many failed searches. Please try again in 5 minutes.");
+            setTimeout(() => { failedLookupsRef.current = 0; setLookupError(null); }, 5 * 60_000);
+          } else {
+            toast.error("No account found");
+          }
         } else {
           toast.error("No account found");
         }
