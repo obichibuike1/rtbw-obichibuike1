@@ -23,6 +23,7 @@ import {
 import { useMyAccount } from "@/lib/use-my-account";
 import { money } from "@/lib/format";
 import { detectPhishing, detectSql, detectXss, logSocEvent, stripUrls } from "@/lib/soc";
+import { getRuleOn } from "@/lib/use-system-settings";
 
 export const Route = createFileRoute("/app/send")({ component: SendMoney });
 
