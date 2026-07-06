@@ -8,7 +8,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { isRuleOn, setSetting, useSystemSettings } from "@/lib/use-system-settings";
 import { supabase } from "@/integrations/supabase/client";
 import { ALL_SIMS } from "@/lib/attack-simulator";
-import { Info, Activity, Zap, Bug, ShieldAlert, Rocket } from "lucide-react";
+import { Info, Activity, Zap, Bug, ShieldAlert, Rocket, RotateCcw, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin/control")({ component: ControlPanel });
 
