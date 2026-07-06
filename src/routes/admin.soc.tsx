@@ -57,8 +57,16 @@ function SocFeed() {
     if (error) toast.error(error.message); else if (action === "escalate") toast.success("Escalated");
   };
 
+  const clearSimulated = async () => {
+    const { data, error } = await supabase.rpc("admin_clear_simulated_soc" as any);
+    if (error) { toast.error(error.message); return; }
+    setRows((prev) => prev.filter((r) => !r.simulated));
+    toast.success(`Cleared ${data ?? 0} simulated event${data === 1 ? "" : "s"}`);
+  };
+
   const filtered = severityFilter === "all" ? rows : rows.filter((r) => r.severity === severityFilter);
   const unreviewed = rows.filter((r) => !r.reviewed).length;
+  const simCount = rows.filter((r) => r.simulated).length;
 
   return (
     <div className="space-y-4">
