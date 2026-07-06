@@ -141,8 +141,8 @@ function SendMoney() {
     // XSS/SQL scan on the account number field (respect toggles)
     const xssOn = getRuleOn("rule.xss_detection", true);
     const sqlOn = getRuleOn("rule.sql_injection_detection", true);
-    const xss = xssOn ? detectXss(acc) : { hit: false } as const;
-    const sql = sqlOn ? detectSql(acc) : { hit: false } as const;
+    const xss: { hit: boolean; match?: string } = xssOn ? detectXss(acc) : { hit: false };
+    const sql: { hit: boolean; match?: string } = sqlOn ? detectSql(acc) : { hit: false };
     if (xss.hit || sql.hit) {
       await logSocEvent({
         threat_type: xss.hit ? "xss" : "sql_injection", severity: "red",
