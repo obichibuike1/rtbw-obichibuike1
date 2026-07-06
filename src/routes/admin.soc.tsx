@@ -5,8 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SEVERITY_STYLE, THREAT_META, type Severity } from "@/lib/soc";
-import { Ban, Eye, ShieldCheck, ArrowUp, User } from "lucide-react";
+import { Ban, Eye, ShieldCheck, ArrowUp, User, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin/soc")({ component: SocFeed });
 
@@ -53,8 +57,16 @@ function SocFeed() {
     if (error) toast.error(error.message); else if (action === "escalate") toast.success("Escalated");
   };
 
+  const clearSimulated = async () => {
+    const { data, error } = await supabase.rpc("admin_clear_simulated_soc" as any);
+    if (error) { toast.error(error.message); return; }
+    setRows((prev) => prev.filter((r) => !r.simulated));
+    toast.success(`Cleared ${data ?? 0} simulated event${data === 1 ? "" : "s"}`);
+  };
+
   const filtered = severityFilter === "all" ? rows : rows.filter((r) => r.severity === severityFilter);
   const unreviewed = rows.filter((r) => !r.reviewed).length;
+  const simCount = rows.filter((r) => r.simulated).length;
 
   return (
     <div className="space-y-4">
@@ -63,7 +75,26 @@ function SocFeed() {
           <h1 className="text-2xl font-semibold flex items-center gap-2"><ShieldCheck className="size-6 text-primary" /> Threat Intelligence Feed</h1>
           <p className="text-sm text-muted-foreground">Live SOC — every detected attack across the platform. {unreviewed} unreviewed.</p>
         </div>
-        <div className="flex gap-1 flex-wrap">
+        <div className="flex gap-1 flex-wrap items-center">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button size="sm" variant="outline" className="text-xs" disabled={simCount === 0}>
+                <Trash2 className="size-3 mr-1" /> Clear simulated ({simCount})
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear all simulated events?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This removes every event tagged <span className="font-mono px-1 border rounded bg-muted">SIMULATED</span> from the SOC feed. Real detections stay.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={clearSimulated}>Clear simulated</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           {(["all","red","orange","yellow","blue"] as const).map((s) => (
             <Button key={s} size="sm" variant={severityFilter === s ? "default" : "outline"}
               onClick={() => setSeverityFilter(s as any)} className="text-xs uppercase">

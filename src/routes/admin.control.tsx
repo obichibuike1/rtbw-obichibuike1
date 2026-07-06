@@ -8,7 +8,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { isRuleOn, setSetting, useSystemSettings } from "@/lib/use-system-settings";
 import { supabase } from "@/integrations/supabase/client";
 import { ALL_SIMS } from "@/lib/attack-simulator";
-import { Info, Activity, Zap, Bug, ShieldAlert, Rocket } from "lucide-react";
+import { Info, Activity, Zap, Bug, ShieldAlert, Rocket, RotateCcw, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin/control")({ component: ControlPanel });
 
@@ -47,6 +52,21 @@ const SIMS: Array<{ key: string; label: string }> = [
 function ControlPanel() {
   const settings = useSystemSettings();
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [resetting, setResetting] = useState(false);
+
+  const runReset = async () => {
+    setResetting(true);
+    try {
+      const { data, error } = await supabase.rpc("admin_reset_demo" as any);
+      if (error) throw error;
+      const r = (data ?? {}) as any;
+      toast.success(`Demo reset — ${r.soc_cleared ?? 0} SOC events, ${r.ips_cleared ?? 0} IPs cleared, ${r.accounts_reset ?? 0} accounts reset`);
+    } catch (e: any) {
+      toast.error(e.message ?? "Reset failed");
+    } finally {
+      setResetting(false);
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -90,9 +110,31 @@ function ControlPanel() {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2"><Activity className="size-6 text-primary" /> System Control Panel</h1>
-          <p className="text-sm text-muted-foreground">Master switches for every detection rule and simulator. Changes persist and apply live.</p>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-semibold flex items-center gap-2"><Activity className="size-6 text-primary" /> System Control Panel</h1>
+            <p className="text-sm text-muted-foreground">Master switches for every detection rule and simulator. Changes persist and apply live.</p>
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" disabled={resetting}>
+                {resetting ? <Loader2 className="size-4 mr-2 animate-spin" /> : <RotateCcw className="size-4 mr-2" />}
+                Reset Demo Data
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset all demo data?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This clears every SOC event, blocked IP, security event, and transaction, resets every customer balance to $50,000, and clears all lockouts and failed-attempt counters. Detection-rule toggles are kept as-is. Use this between demo runs.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={runReset}>Reset everything</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         <Card>

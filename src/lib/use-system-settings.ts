@@ -47,6 +47,12 @@ export function isRuleOn(settings: SettingsMap, key: string, defaultOn = true) {
   return v === true || v === "true";
 }
 
+/** Sync read against the module cache — usable outside React. */
+export function getRuleOn(key: string, defaultOn = true) {
+  ensureSubscribed();
+  return isRuleOn(cache, key, defaultOn);
+}
+
 export async function setSetting(key: string, value: any) {
   try {
     const { error } = await supabase.rpc("admin_set_setting", { _key: key, _value: value } as any);

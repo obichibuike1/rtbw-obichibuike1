@@ -23,6 +23,7 @@ import {
 import { useMyAccount } from "@/lib/use-my-account";
 import { money } from "@/lib/format";
 import { detectPhishing, detectSql, detectXss, logSocEvent, stripUrls } from "@/lib/soc";
+import { getRuleOn } from "@/lib/use-system-settings";
 
 export const Route = createFileRoute("/app/send")({ component: SendMoney });
 
@@ -137,8 +138,11 @@ function SendMoney() {
   const doLookup = async () => {
     if (!acc.trim()) return;
     setLookupError(null);
-    // XSS/SQL scan on the account number field
-    const xss = detectXss(acc); const sql = detectSql(acc);
+    // XSS/SQL scan on the account number field (respect toggles)
+    const xssOn = getRuleOn("rule.xss_detection", true);
+    const sqlOn = getRuleOn("rule.sql_injection_detection", true);
+    const xss: { hit: boolean; match?: string } = xssOn ? detectXss(acc) : { hit: false };
+    const sql: { hit: boolean; match?: string } = sqlOn ? detectSql(acc) : { hit: false };
     if (xss.hit || sql.hit) {
       await logSocEvent({
         threat_type: xss.hit ? "xss" : "sql_injection", severity: "red",
@@ -151,13 +155,17 @@ function SendMoney() {
       const r = await lookupRecipient({ data: { accountNumber: acc.trim() } });
       if (!r) {
         failedLookupsRef.current++;
-        await logSocEvent({
-          threat_type: "enumeration", severity: "orange", field: "send.recipient",
-          payload: `Failed lookup: ${acc.trim()}`, details: { attempts: failedLookupsRef.current },
-        });
-        if (failedLookupsRef.current >= 3) {
-          setLookupError("Too many failed searches. Please try again in 5 minutes.");
-          setTimeout(() => { failedLookupsRef.current = 0; setLookupError(null); }, 5 * 60_000);
+        if (getRuleOn("rule.enumeration_detection", true)) {
+          await logSocEvent({
+            threat_type: "enumeration", severity: "orange", field: "send.recipient",
+            payload: `Failed lookup: ${acc.trim()}`, details: { attempts: failedLookupsRef.current },
+          });
+          if (failedLookupsRef.current >= 3) {
+            setLookupError("Too many failed searches. Please try again in 5 minutes.");
+            setTimeout(() => { failedLookupsRef.current = 0; setLookupError(null); }, 5 * 60_000);
+          } else {
+            toast.error("No account found");
+          }
         } else {
           toast.error("No account found");
         }
@@ -208,9 +216,9 @@ function SendMoney() {
     if (!recipient) { toast.error("Look up the recipient first"); return; }
     if (!amt || amt <= 0) { setAmountError("Enter a valid amount"); return; }
 
-    // XSS/SQL scan on note
-    const xssNote = detectXss(note);
-    const sqlNote = detectSql(note);
+    // Toggle-gated XSS/SQL scan on note
+    const xssNote = getRuleOn("rule.xss_detection", true) ? detectXss(note) : { hit: false } as { hit: boolean; match?: string };
+    const sqlNote = getRuleOn("rule.sql_injection_detection", true) ? detectSql(note) : { hit: false } as { hit: boolean; match?: string };
     if (xssNote.hit) {
       await logSocEvent({ threat_type: "xss", severity: "red", field: "narration", payload: xssNote.match });
       setNoteError("Invalid characters detected. Please enter plain text only.");
@@ -224,35 +232,39 @@ function SendMoney() {
       return;
     }
     // Phishing URL scan — strip, warn, escalate if large
-    const phish = detectPhishing(note);
-    if (phish.hit) {
-      const isLarge = amt >= balance * 0.5;
-      await logSocEvent({
-        threat_type: "phishing", severity: isLarge ? "red" : "yellow", field: "narration",
-        payload: phish.match, details: { amount: amt, large: isLarge },
-      });
-      setNote(stripUrls(note));
-      setNoteError("URLs are not allowed in transfer notes.");
-      return;
+    if (getRuleOn("rule.phishing_detection", true)) {
+      const phish = detectPhishing(note);
+      if (phish.hit) {
+        const isLarge = amt >= balance * 0.5;
+        await logSocEvent({
+          threat_type: "phishing", severity: isLarge ? "red" : "yellow", field: "narration",
+          payload: phish.match, details: { amount: amt, large: isLarge },
+        });
+        setNote(stripUrls(note));
+        setNoteError("URLs are not allowed in transfer notes.");
+        return;
+      }
     }
 
     // Duplicate-attack detection (4+ same tx to same recipient within 5min)
-    const nowT = Date.now();
-    dupAttemptRef.current = dupAttemptRef.current.filter((r) => nowT - r.t < 5 * 60_000);
-    dupAttemptRef.current.push({ acc: recipient.account_number, amt, t: nowT });
-    const repeats = dupAttemptRef.current.filter((r) => r.acc === recipient.account_number && r.amt === amt).length;
-    if (repeats >= 4) {
-      await logSocEvent({
-        threat_type: "duplicate_attack", severity: "red", field: "send",
-        payload: `${repeats} identical transfers to ${recipient.account_number} within 5min`,
-        details: { recipient: recipient.account_number, amount: amt },
-      });
-      toast.error("Automated duplicate transfer attack detected. Transfers blocked for 10 minutes.");
-      return;
+    if (getRuleOn("rule.duplicate_transfer", true)) {
+      const nowT = Date.now();
+      dupAttemptRef.current = dupAttemptRef.current.filter((r) => nowT - r.t < 5 * 60_000);
+      dupAttemptRef.current.push({ acc: recipient.account_number, amt, t: nowT });
+      const repeats = dupAttemptRef.current.filter((r) => r.acc === recipient.account_number && r.amt === amt).length;
+      if (repeats >= 4) {
+        await logSocEvent({
+          threat_type: "duplicate_attack", severity: "red", field: "send",
+          payload: `${repeats} identical transfers to ${recipient.account_number} within 5min`,
+          details: { recipient: recipient.account_number, amount: amt },
+        });
+        toast.error("Automated duplicate transfer attack detected. Transfers blocked for 10 minutes.");
+        return;
+      }
     }
 
     // 90% rule — block client-side BEFORE any DB write
-    if (amt > cap) {
+    if (getRuleOn("rule.cap_90", true) && amt > cap) {
       setAmountError(`You can only transfer up to 90% of your available balance. Maximum allowed: ${money(cap)}`);
       try {
         await logCapRejection({ data: { attemptedAmount: amt, balance, cap, recipient: recipient.account_number } });
@@ -263,7 +275,7 @@ function SendMoney() {
 
 
     // 80% security-question challenge (BEFORE PIN)
-    if (!securityPassed && balance > 0 && amt / balance >= 0.8 && amt <= cap) {
+    if (getRuleOn("rule.security_challenge_80", true) && !securityPassed && balance > 0 && amt / balance >= 0.8 && amt <= cap) {
       setBusy(true);
       try {
         const q = await getMySecurityQuestion();
