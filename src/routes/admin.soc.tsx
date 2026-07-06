@@ -75,7 +75,26 @@ function SocFeed() {
           <h1 className="text-2xl font-semibold flex items-center gap-2"><ShieldCheck className="size-6 text-primary" /> Threat Intelligence Feed</h1>
           <p className="text-sm text-muted-foreground">Live SOC — every detected attack across the platform. {unreviewed} unreviewed.</p>
         </div>
-        <div className="flex gap-1 flex-wrap">
+        <div className="flex gap-1 flex-wrap items-center">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button size="sm" variant="outline" className="text-xs" disabled={simCount === 0}>
+                <Trash2 className="size-3 mr-1" /> Clear simulated ({simCount})
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear all simulated events?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This removes every event tagged <span className="font-mono px-1 border rounded bg-muted">SIMULATED</span> from the SOC feed. Real detections stay.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={clearSimulated}>Clear simulated</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           {(["all","red","orange","yellow","blue"] as const).map((s) => (
             <Button key={s} size="sm" variant={severityFilter === s ? "default" : "outline"}
               onClick={() => setSeverityFilter(s as any)} className="text-xs uppercase">
