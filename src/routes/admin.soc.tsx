@@ -5,8 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SEVERITY_STYLE, THREAT_META, type Severity } from "@/lib/soc";
-import { Ban, Eye, ShieldCheck, ArrowUp, User } from "lucide-react";
+import { Ban, Eye, ShieldCheck, ArrowUp, User, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin/soc")({ component: SocFeed });
 
