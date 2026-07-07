@@ -221,6 +221,12 @@ function AdminLogin() {
                     {busy && <Loader2 className="size-4 animate-spin mr-2" />}
                     Sign in
                   </Button>
+                  <Link
+                    to="/admin/recover"
+                    className="block text-center text-xs text-muted-foreground hover:text-primary hover:underline"
+                  >
+                    Reset Admin Credentials
+                  </Link>
                 </form>
                 <p className="mt-5 text-center text-[10px] uppercase tracking-widest text-muted-foreground/70">
                   Authorized Personnel Only — Unauthorized access is monitored and logged
