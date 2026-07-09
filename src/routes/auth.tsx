@@ -210,16 +210,9 @@ function AuthPage() {
                     {lockedUntil && secondsLeft > 0 ? `Locked · ${secondsLeft}s` : "Sign in"}
                   </Button>
                 </form>
-                <div className="mt-6 border-t pt-4">
-                  <Button size="sm" variant="ghost" className="w-full" onClick={runSeed} disabled={seeding}>
-                    {seeding && <Loader2 className="size-3 animate-spin mr-2" />}
-                    {seeding ? "Preparing demo data…" : "Initialize demo data (first run)"}
-                  </Button>
-                  <p className="mt-2 text-[10px] text-muted-foreground text-center">
-                    Sign-in credentials are not shown publicly. Use the credentials provided for your evaluation.
-                  </p>
-                </div>
               </TabsContent>
+
+
               <TabsContent value="signup">
                 <form onSubmit={onSignUp} className="space-y-3 mt-4">
                   <div><Label>Full name</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
