@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "settings readable by all authenticated" ON public.system_settings;
