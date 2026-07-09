@@ -145,7 +145,7 @@ function ControlPanel() {
               return (
                 <div key={r.key} className="flex items-center justify-between gap-2 p-3 rounded-lg border bg-card/40">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className={`inline-block size-2 rounded-full ${on ? "bg-emerald-400 shadow-[0_0_8px_theme(colors.emerald.400)]" : "bg-red-500"}`} />
+                    <span className={`inline-block size-2 rounded-full ${on ? "bg-success shadow-[0_0_8px_var(--color-success)]" : "bg-destructive"}`} />
                     <span className="text-sm font-medium truncate">{r.label}</span>
                     <Tooltip><TooltipTrigger asChild><Info className="size-3 text-muted-foreground shrink-0 cursor-help" /></TooltipTrigger><TooltipContent side="top" className="max-w-xs">{r.help}</TooltipContent></Tooltip>
                   </div>
