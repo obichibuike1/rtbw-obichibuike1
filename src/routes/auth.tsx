@@ -209,7 +209,9 @@ function AuthPage() {
                     {busy && <Loader2 className="size-4 animate-spin mr-2" />}
                     {lockedUntil && secondsLeft > 0 ? `Locked · ${secondsLeft}s` : "Sign in"}
                   </Button>
+                </form>
               </TabsContent>
+
 
               <TabsContent value="signup">
                 <form onSubmit={onSignUp} className="space-y-3 mt-4">
