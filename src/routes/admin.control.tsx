@@ -162,7 +162,7 @@ function ControlPanel() {
         <Card>
           <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><Zap className="size-4 text-primary" /> Notification Preferences</CardTitle></CardHeader>
           <CardContent className="flex items-center gap-3 p-4">
-            <span className={`inline-block size-2 rounded-full ${isRuleOn(settings, "ui.sound_alerts", true) ? "bg-emerald-400" : "bg-red-500"}`} />
+            <span className={`inline-block size-2 rounded-full ${isRuleOn(settings, "ui.sound_alerts", true) ? "bg-success" : "bg-destructive"}`} />
             <span className="text-sm font-medium flex-1">Sound Alerts (beep on RED threats)</span>
             <Switch checked={isRuleOn(settings, "ui.sound_alerts", true)} onCheckedChange={(v) => setSetting("ui.sound_alerts", v)} />
           </CardContent>
