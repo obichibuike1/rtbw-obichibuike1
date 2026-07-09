@@ -109,7 +109,7 @@ function IpManagement() {
                   const isBlocked = blocked.some((b) => b.ip_address === r.ip);
                   return (
                     <tr key={r.ip} className="border-b hover:bg-muted/30">
-                      <td className="p-3 font-mono"><span className={isBlocked ? "text-red-400" : r.count > 5 ? "text-amber-400" : "text-emerald-400"}>{r.ip}</span></td>
+                      <td className="p-3 font-mono"><span className={isBlocked ? "text-destructive" : r.count > 5 ? "text-warning" : "text-success"}>{r.ip}</span></td>
                       <td className="p-3 text-xs text-muted-foreground truncate max-w-xs">{[...r.targets].join(", ") || "—"}</td>
                       <td className="p-3 text-right font-semibold tabular-nums">{r.count}</td>
                       <td className="p-3 text-xs text-muted-foreground">{new Date(r.last).toLocaleTimeString()}</td>
