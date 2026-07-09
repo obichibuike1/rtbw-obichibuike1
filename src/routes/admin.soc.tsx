@@ -116,7 +116,7 @@ function SocFeed() {
               const isEscalated = e.priority > 0;
               return (
                 <div key={e.id}
-                  className={`p-3 border-b border-border/40 ${style.row} ${isNewRow ? "threat-new-pulse" : ""} ${isEscalated ? "bg-red-950/30" : ""} ${e.reviewed ? "opacity-60" : ""}`}>
+                  className={`p-3 border-b border-border/40 ${style.row} ${isNewRow ? "threat-new-pulse" : ""} ${isEscalated ? "bg-destructive/10" : ""} ${e.reviewed ? "opacity-60" : ""}`}>
                   <div className="flex items-start gap-3 flex-wrap">
                     <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
                       <Badge className={`${style.badge} border font-mono text-[10px] uppercase`}>{style.label}</Badge>
@@ -139,7 +139,7 @@ function SocFeed() {
                     {e.target_email && <span>→ {e.target_email}</span>}
                   </div>
                   {e.payload && (
-                    <div className="mt-2 p-2 rounded bg-black/40 border border-white/5 font-mono text-xs text-orange-300 break-all">
+                    <div className="mt-2 p-2 rounded bg-muted/60 border border-border/60 font-mono text-xs text-warning break-all">
                       {e.payload}
                     </div>
                   )}
