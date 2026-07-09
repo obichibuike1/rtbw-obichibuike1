@@ -139,7 +139,7 @@ function SocFeed() {
                     {e.target_email && <span>→ {e.target_email}</span>}
                   </div>
                   {e.payload && (
-                    <div className="mt-2 p-2 rounded bg-black/40 border border-white/5 font-mono text-xs text-orange-300 break-all">
+                    <div className="mt-2 p-2 rounded bg-muted/60 border border-border/60 font-mono text-xs text-warning break-all">
                       {e.payload}
                     </div>
                   )}
