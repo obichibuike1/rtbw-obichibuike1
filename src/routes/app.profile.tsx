@@ -109,6 +109,10 @@ function Page() {
         )}
       </Card>
 
+      <ChangePinCard />
+
+
+
       <Button variant="outline" className="w-full" onClick={async () => { await signOut(); nav({ to: "/auth" }); }}>
         <LogOut className="size-4 mr-2" /> Sign out
       </Button>
