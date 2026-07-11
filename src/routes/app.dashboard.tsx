@@ -4,7 +4,7 @@ import { useLiveBalance, useLiveTransactions } from "@/lib/use-realtime-tx";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { money, shortTime, txTypeLabel } from "@/lib/format";
-import { ArrowDownLeft, ArrowUpRight, FileText, Send } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, FileText, Send, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/app/dashboard")({ component: CustomerHome });
