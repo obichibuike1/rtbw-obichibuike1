@@ -325,6 +325,10 @@ export type Database = {
         Returns: undefined
       }
       admin_unblock_ip: { Args: { _ip: string }; Returns: undefined }
+      change_transfer_pin: {
+        Args: { _new_pin: string; _old_pin: string }
+        Returns: Json
+      }
       check_duplicate_transfer: {
         Args: { _amount: number; _recipient_account_number: string }
         Returns: Json

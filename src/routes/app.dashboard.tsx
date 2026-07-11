@@ -4,7 +4,7 @@ import { useLiveBalance, useLiveTransactions } from "@/lib/use-realtime-tx";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { money, shortTime, txTypeLabel } from "@/lib/format";
-import { ArrowDownLeft, ArrowUpRight, FileText, Send } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, FileText, Send, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/app/dashboard")({ component: CustomerHome });
@@ -20,9 +20,14 @@ function CustomerHome() {
 
   return (
     <div className="p-5 space-y-5">
-      <div>
-        <p className="text-sm text-muted-foreground">Welcome back,</p>
-        <h1 className="text-xl font-semibold">{account.full_name}</h1>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">Welcome back,</p>
+          <h1 className="text-xl font-semibold">{account.full_name}</h1>
+        </div>
+        <Button asChild variant="ghost" size="icon" className="rounded-full" aria-label="Settings">
+          <Link to="/app/profile"><Settings className="size-5" /></Link>
+        </Button>
       </div>
 
       <Card className={`p-6 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-3xl transition-all ${flash ? "scale-[1.02] ring-4 ring-primary/30" : ""}`}>

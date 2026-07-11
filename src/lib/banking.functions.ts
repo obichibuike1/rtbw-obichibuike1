@@ -241,6 +241,21 @@ export const verifyTransferPin = createServerFn({ method: "POST" })
     return r as { ok: boolean; locked?: boolean; until?: string; attempts?: number; remaining?: number };
   });
 
+export const changeTransferPin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    oldPin: z.string().trim().min(4).max(12),
+    newPin: z.string().trim().min(4).max(12).regex(/^\d+$/, "PIN must be digits only"),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: r, error } = await (context.supabase.rpc as any)("change_transfer_pin", {
+      _old_pin: data.oldPin,
+      _new_pin: data.newPin,
+    });
+    if (error) throw new Error(error.message);
+    return r as { ok: boolean; locked?: boolean; until?: string; reason?: string };
+  });
+
 // ---- Security: 90% cap rejection log ----
 
 export const logCapRejection = createServerFn({ method: "POST" })
