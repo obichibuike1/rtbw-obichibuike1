@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Check, KeyRound, Loader2, LogOut, ShieldQuestion, User } from "lucide-react";
+import { Check, KeyRound, Loader2, Lock, LogOut, ShieldQuestion, User } from "lucide-react";
 import { toast } from "sonner";
 import { getMySecurityQuestion, setSecurityQuestion, changeTransferPin } from "@/lib/banking.functions";
 import { PasswordInput } from "@/components/ui/password-input";
