@@ -123,3 +123,56 @@ function Page() {
 function Row({ k, v }: { k: string; v: string }) {
   return <div className="flex items-center justify-between text-sm"><span className="text-muted-foreground">{k}</span><span className="font-medium">{v}</span></div>;
 }
+
+function ChangePinCard() {
+  const [oldPin, setOldPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (!/^\d{4,12}$/.test(newPin)) { toast.error("New PIN must be 4–12 digits"); return; }
+    if (newPin !== confirmPin) { toast.error("New PINs do not match"); return; }
+    if (newPin === oldPin) { toast.error("New PIN must differ from current PIN"); return; }
+    setBusy(true);
+    try {
+      const r = await changeTransferPin({ data: { oldPin, newPin } });
+      if (r.locked) { toast.error("PIN entry is temporarily locked. Try again later."); return; }
+      if (!r.ok) { toast.error(r.reason ?? "Could not change PIN"); return; }
+      toast.success("Transfer PIN updated");
+      setOldPin(""); setNewPin(""); setConfirmPin("");
+    } catch (e: any) { toast.error(e.message ?? "Failed to change PIN"); }
+    finally { setBusy(false); }
+  };
+
+  return (
+    <Card className="p-5 rounded-2xl space-y-3">
+      <div className="flex items-center gap-2">
+        <Lock className="size-5 text-primary" />
+        <div className="font-semibold">Change transfer PIN</div>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Your transfer PIN authorises every Send Money request. Use 4–12 digits.
+      </p>
+      <div>
+        <Label>Current PIN</Label>
+        <PasswordInput inputMode="numeric" autoComplete="current-password" maxLength={12}
+          value={oldPin} onChange={(e) => setOldPin(e.target.value.replace(/\D/g, ""))} placeholder="Current PIN" />
+      </div>
+      <div>
+        <Label>New PIN</Label>
+        <PasswordInput inputMode="numeric" autoComplete="new-password" maxLength={12}
+          value={newPin} onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))} placeholder="4–12 digits" />
+      </div>
+      <div>
+        <Label>Confirm new PIN</Label>
+        <PasswordInput inputMode="numeric" autoComplete="new-password" maxLength={12}
+          value={confirmPin} onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))} placeholder="Re-enter new PIN" />
+      </div>
+      <Button onClick={submit} disabled={busy || !oldPin || !newPin || !confirmPin} className="w-full">
+        {busy ? <Loader2 className="size-4 animate-spin mr-2" /> : <Lock className="size-4 mr-2" />}
+        Update PIN
+      </Button>
+    </Card>
+  );
+}
