@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, KeyRound, Loader2, LogOut, ShieldQuestion, User } from "lucide-react";
 import { toast } from "sonner";
-import { getMySecurityQuestion, setSecurityQuestion } from "@/lib/banking.functions";
+import { getMySecurityQuestion, setSecurityQuestion, changeTransferPin } from "@/lib/banking.functions";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export const Route = createFileRoute("/app/profile")({ component: Page });
 
