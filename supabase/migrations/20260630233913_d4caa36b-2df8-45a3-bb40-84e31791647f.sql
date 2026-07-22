@@ -29,7 +29,7 @@ BEGIN
       COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email,'@',1)),
       50000,
       'checking',
-      digest('1234', 'sha256')
+      extensions.digest('1234', 'sha256')
     );
   END IF;
 
@@ -69,7 +69,7 @@ SELECT
   COALESCE(u.raw_user_meta_data->>'full_name', split_part(u.email,'@',1)),
   50000,
   'checking',
-  digest('1234', 'sha256')
+  extensions.digest('1234', 'sha256')
 FROM auth.users u
 WHERE NOT EXISTS (SELECT 1 FROM public.accounts a WHERE a.customer_id = u.id)
   AND EXISTS (SELECT 1 FROM public.user_roles r WHERE r.user_id = u.id AND r.role = 'customer');

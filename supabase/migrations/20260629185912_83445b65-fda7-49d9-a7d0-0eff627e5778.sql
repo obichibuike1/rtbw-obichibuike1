@@ -1,5 +1,5 @@
 
--- Ensure pgcrypto for digest()
+-- Ensure pgcrypto is accessible
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- 1. Profiles: login lockout columns
@@ -15,7 +15,7 @@ ALTER TABLE public.accounts
 
 -- Default PIN '1234' for accounts that don't have one
 UPDATE public.accounts
-SET transfer_pin_hash = digest('1234', 'sha256')
+SET transfer_pin_hash = extensions.digest('1234', 'sha256')
 WHERE transfer_pin_hash IS NULL AND is_system = false;
 
 -- 3. Security events table
@@ -133,7 +133,7 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'locked', true, 'until', acc.pin_locked_until);
   END IF;
 
-  IF acc.transfer_pin_hash IS NOT NULL AND digest(_pin, 'sha256') = acc.transfer_pin_hash THEN
+  IF acc.transfer_pin_hash IS NOT NULL AND extensions.digest(_pin, 'sha256') = acc.transfer_pin_hash THEN
     UPDATE public.accounts SET failed_pin_attempts = 0, pin_locked_until = NULL WHERE id = acc.id;
     RETURN jsonb_build_object('ok', true);
   END IF;
