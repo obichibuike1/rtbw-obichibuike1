@@ -88,10 +88,7 @@ function AdminResetPassword() {
     <div className="admin-theme min-h-screen flex items-center justify-center p-4 bg-background text-foreground">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center gap-2 mb-6">
-          <div className="size-12 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center">
-            <ShieldCheck className="size-6 text-primary" />
-          </div>
-          <div className="text-xl font-semibold tracking-tight">PulseBank</div>
+          <img src="https://www.image2url.com/r2/default/images/1784748314979-7d53ce3d-12cb-4acc-9b6c-adb9a14753f5.png" alt="PulseBank" className="h-14 w-auto" />
           <div className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
             Administration Portal
           </div>

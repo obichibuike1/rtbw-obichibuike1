@@ -48,7 +48,7 @@ function ResetPassword() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-muted/40">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <div className="flex items-center gap-2 mb-1"><Activity className="size-5 text-primary" /><span className="font-semibold">PulseBank</span></div>
+          <div className="flex items-center gap-2 mb-1"><img src="https://www.image2url.com/r2/default/images/1784748314979-7d53ce3d-12cb-4acc-9b6c-adb9a14753f5.png" alt="PulseBank" className="h-5 w-auto" /></div>
           <CardTitle>Set a new password</CardTitle>
           <CardDescription>
             {ready ? "Choose a strong password of at least 8 characters." : "Waiting for a valid reset link…"}

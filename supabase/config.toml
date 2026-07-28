@@ -1,1 +1,5 @@
-project_id = "yzhmdmiqivxnfaepynwe"
+project_id = "stfydsdxlchwejjcbbfp"
+
+[auth]
+enabled = true
+mailer_autoconfirm = true

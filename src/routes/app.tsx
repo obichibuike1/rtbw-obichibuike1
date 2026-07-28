@@ -20,6 +20,7 @@ function CustomerLayout() {
   useEffect(() => {
     if (loading || roleLoading) return;
     if (!user) nav({ to: "/auth" });
+    else if (role === null) nav({ to: "/auth" });
     else if (role !== "customer") nav({ to: "/admin/dashboard" });
   }, [user, role, loading, roleLoading, nav]);
 

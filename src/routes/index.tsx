@@ -20,7 +20,7 @@ function Landing() {
       <header className="border-b">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 font-semibold">
-            <Activity className="size-5 text-primary" /> PulseBank
+            <img src="https://www.image2url.com/r2/default/images/1784748314979-7d53ce3d-12cb-4acc-9b6c-adb9a14753f5.png" alt="PulseBank" className="h-5 w-auto" />
           </div>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost"><Link to="/auth">Sign in</Link></Button>

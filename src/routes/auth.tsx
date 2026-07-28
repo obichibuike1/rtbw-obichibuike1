@@ -25,7 +25,7 @@ type View = "signin" | "forgot" | "forgot-sent";
 
 function AuthPage() {
   const nav = useNavigate();
-  const { role, loading, roleLoading } = useAuth();
+  const { role, user, loading, roleLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -41,7 +41,9 @@ function AuthPage() {
     if (loading || roleLoading) return;
     if (role === "admin") nav({ to: "/admin/dashboard" });
     else if (role === "customer") nav({ to: "/app/dashboard" });
-  }, [role, loading, roleLoading, nav]);
+    // fallback: signed in but no role found - navigate to customer dashboard anyway
+    else if (role === null && user) nav({ to: "/app/dashboard" });
+  }, [role, user, loading, roleLoading, nav]);
 
   useEffect(() => {
     if (!lockedUntil) return;
@@ -121,6 +123,8 @@ function AuthPage() {
 
       try { await registerSuccessfulLogin(); } catch {}
       toast.success("Welcome back");
+      // Navigate immediately so they don't get stuck if role query lags
+      nav({ to: "/app/dashboard" });
     } finally {
       setBusy(false);
     }
@@ -135,7 +139,13 @@ function AuthPage() {
     });
     setBusy(false);
     if (error) toast.error(error.message);
-    else toast.success("Account created — signing you in");
+    else {
+      toast.success("Account created — signing you in");
+      // Auto sign-in after sign-up so customers can use the app right away
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) toast.error(signInError.message);
+      else nav({ to: "/app/dashboard" });
+    }
   };
 
   const onForgot = async (e: React.FormEvent) => {
@@ -164,7 +174,7 @@ function AuthPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-muted/40">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <div className="flex items-center gap-2 mb-1"><Activity className="size-5 text-primary" /><span className="font-semibold">PulseBank</span></div>
+          <div className="flex items-center gap-2 mb-1"><img src="https://www.image2url.com/r2/default/images/1784748314979-7d53ce3d-12cb-4acc-9b6c-adb9a14753f5.png" alt="PulseBank" className="h-5 w-auto" /></div>
           <CardTitle>
             {view === "forgot" ? "Reset your password" :
              view === "forgot-sent" ? "Check your email" : "Welcome"}

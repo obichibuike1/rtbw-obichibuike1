@@ -102,7 +102,7 @@ function AdminLayout() {
           <Sidebar collapsible="icon">
             <SidebarContent>
               <div className="px-3 py-4 flex items-center gap-2 font-semibold">
-                <Activity className="size-5 text-primary" /><span className="group-data-[collapsible=icon]:hidden">PulseBank SOC</span>
+                <img src="https://www.image2url.com/r2/default/images/1784748314979-7d53ce3d-12cb-4acc-9b6c-adb9a14753f5.png" alt="PulseBank" className="h-5 w-auto shrink-0" /><span className="group-data-[collapsible=icon]:hidden">PulseBank SOC</span>
               </div>
               <SidebarGroup>
                 <SidebarGroupLabel>Monitoring</SidebarGroupLabel>

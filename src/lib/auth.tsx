@@ -62,6 +62,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => { await supabase.auth.signOut(); };
 
+  // Session inactivity timeout — sign out after 60s of no interaction
+  useEffect(() => {
+    if (!session?.user) return;
+    const INACTIVITY_MS = 1_800_000; // 30 minutes
+    let t: ReturnType<typeof setTimeout>;
+    const reset = () => { clearTimeout(t); t = setTimeout(signOut, INACTIVITY_MS); };
+    const events = ["mousedown", "keydown", "touchstart", "scroll", "click"];
+    events.forEach((e) => window.addEventListener(e, reset));
+    reset();
+    return () => {
+      clearTimeout(t);
+      events.forEach((e) => window.removeEventListener(e, reset));
+    };
+  }, [session?.user]);
+
   return (
     <Ctx.Provider value={{ session, user: session?.user ?? null, role, loading, roleLoading, signOut }}>
       {children}

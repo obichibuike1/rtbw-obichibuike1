@@ -43,40 +43,40 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Default = customer light theme */
+/* Default = customer navy-white theme */
 :root {
   --radius: 0.875rem;
-  --background: oklch(0.985 0.005 240);
-  --foreground: oklch(0.18 0.04 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.04 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.04 250);
-  --primary: oklch(0.55 0.18 255);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0.01 240);
-  --secondary-foreground: oklch(0.25 0.04 250);
-  --muted: oklch(0.95 0.01 240);
-  --muted-foreground: oklch(0.5 0.03 250);
-  --accent: oklch(0.94 0.04 255);
-  --accent-foreground: oklch(0.25 0.08 255);
-  --destructive: oklch(0.62 0.22 25);
+  --background: oklch(0.18 0.035 262);       /* rich navy */
+  --foreground: oklch(0.96 0.005 250);        /* white text */
+  --card: oklch(0.99 0 0);                     /* white card */
+  --card-foreground: oklch(0.18 0.04 262);    /* navy text */
+  --popover: oklch(0.99 0 0);                  /* white popover */
+  --popover-foreground: oklch(0.18 0.04 262); /* navy text */
+  --primary: oklch(0.3 0.08 262);              /* deep navy primary */
+  --primary-foreground: oklch(0.99 0 0);       /* white */
+  --secondary: oklch(0.25 0.05 262);           /* muted navy */
+  --secondary-foreground: oklch(0.96 0.01 240);/* white */
+  --muted: oklch(0.22 0.04 262);               /* muted navy bg */
+  --muted-foreground: oklch(0.72 0.02 250);   /* soft gray */
+  --accent: oklch(0.4 0.1 260);                /* brighter navy-blue */
+  --accent-foreground: oklch(0.99 0 0);        /* white */
+  --destructive: oklch(0.62 0.22 25);          /* red */
   --destructive-foreground: oklch(0.99 0 0);
-  --success: oklch(0.62 0.16 155);
+  --success: oklch(0.62 0.16 155);             /* green */
   --success-foreground: oklch(0.99 0 0);
-  --warning: oklch(0.78 0.16 75);
+  --warning: oklch(0.78 0.16 75);              /* amber */
   --warning-foreground: oklch(0.2 0.05 75);
-  --border: oklch(0.9 0.01 240);
-  --input: oklch(0.92 0.01 240);
-  --ring: oklch(0.55 0.18 255);
-  --sidebar: oklch(0.99 0.003 240);
-  --sidebar-foreground: oklch(0.18 0.04 250);
-  --sidebar-primary: oklch(0.55 0.18 255);
+  --border: oklch(0.32 0.04 260);              /* navy border */
+  --input: oklch(0.25 0.04 260);               /* navy input bg */
+  --ring: oklch(0.5 0.18 260);                 /* blue focus ring */
+  --sidebar: oklch(0.15 0.03 262);             /* darker navy sidebar */
+  --sidebar-foreground: oklch(0.92 0.01 240);
+  --sidebar-primary: oklch(0.35 0.1 260);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.94 0.02 240);
-  --sidebar-accent-foreground: oklch(0.25 0.04 250);
-  --sidebar-border: oklch(0.9 0.01 240);
-  --sidebar-ring: oklch(0.55 0.18 255);
+  --sidebar-accent: oklch(0.22 0.05 262);
+  --sidebar-accent-foreground: oklch(0.95 0.01 240);
+  --sidebar-border: oklch(0.22 0.04 260);
+  --sidebar-ring: oklch(0.5 0.18 260);
 }
 
 /* Admin = dark fintech ops console */

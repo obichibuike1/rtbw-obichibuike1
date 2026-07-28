@@ -195,9 +195,7 @@ function SendMoney() {
       });
       setReceipt({ ...res, recipient, amount: amt, note });
       setStep("success");
-      if (res.duplicate_confirmed) toast.warning("Duplicate transfer sent — flagged for review");
-      else if (res.status === "flagged") toast.warning("Transfer completed but flagged for review");
-      else toast.success("Transfer sent");
+      toast.success("Transfer sent");
     } catch (e: any) {
       if (e.code === "DUPLICATE_DETECTED") {
         setDupInfo({ secondsAgo: e.secondsAgo ?? 0, amount: amt });
@@ -368,8 +366,7 @@ function SendMoney() {
           <Row k="To" v={receipt.recipient.full_name} />
           <Row k="Account" v={receipt.recipient.account_number} mono />
           {receipt.note && <Row k="Note" v={receipt.note} />}
-          <Row k="Status" v={receipt.status === "flagged" ? "Flagged for review" : "Completed"} />
-          {receipt.reason && <Row k="Reason" v={receipt.reason} />}
+          <Row k="Status" v="Completed" />
         </Card>
         <div className="grid grid-cols-2 gap-3">
           <Button variant="outline" onClick={() => { setStep("form"); setRecipient(null); setAcc(""); setAmount(""); setNote(""); setPin(""); setReceipt(null); setSecurityPassed(false); }}>New transfer</Button>

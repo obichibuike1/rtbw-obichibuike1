@@ -33,7 +33,7 @@ export function useLiveTransactions(opts: Opts = {}) {
       let q = supabase.from("transactions").select("*").order("timestamp", { ascending: false }).limit(limit);
       if (flaggedOnly) q = q.eq("status", "flagged");
       if (accountIds && accountIds.length) {
-        const list = accountIds.map((id) => `account_id.eq.${id},related_account_id.eq.${id}`).join(",");
+        const list = accountIds.map((id) => `account_id.eq.${id}`).join(",");
         q = q.or(list);
       }
       const { data } = await q;
@@ -47,7 +47,7 @@ export function useLiveTransactions(opts: Opts = {}) {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "transactions" }, (payload) => {
         const t = payload.new as Tx;
         if (flaggedOnly && t.status !== "flagged") return;
-        if (accountIds && accountIds.length && !accountIds.includes(t.account_id) && !(t.related_account_id && accountIds.includes(t.related_account_id))) return;
+        if (accountIds && accountIds.length && !accountIds.includes(t.account_id)) return;
         newIdsRef.current.add(t.id);
         setRows((prev) => [t, ...prev].slice(0, limit));
         setTimeout(() => newIdsRef.current.delete(t.id), 2000);
