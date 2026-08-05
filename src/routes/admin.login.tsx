@@ -117,6 +117,9 @@ function AdminLogin() {
       });
       toast.success("Welcome, administrator");
       nav({ to: "/admin/dashboard" });
+    } catch (err: any) {
+      console.error("Admin sign-in failed:", err);
+      toast.error(err?.message ? `Unable to sign in: ${err.message}` : "Unable to sign in. Please try again.");
     } finally {
       setBusy(false);
     }

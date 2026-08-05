@@ -125,6 +125,9 @@ function AuthPage() {
       toast.success("Welcome back");
       // Navigate immediately so they don't get stuck if role query lags
       nav({ to: "/app/dashboard" });
+    } catch (err: any) {
+      console.error("Sign-in failed:", err);
+      toast.error(err?.message ? `Unable to sign in: ${err.message}` : "Unable to sign in. Please try again.");
     } finally {
       setBusy(false);
     }
