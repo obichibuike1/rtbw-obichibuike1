@@ -61,7 +61,7 @@ function AdminLogin() {
         failRef.current += 1;
         writeFailCount(failRef.current);
         // Blue informational event for every failed admin login
-        await logSocEvent({
+        logSocEvent({
           threat_type: "admin_login_failed",
           severity: "blue",
           field: "admin_login",
@@ -86,14 +86,19 @@ function AdminLogin() {
       // Signed in — verify admin role BEFORE letting through
       const uid = data.user?.id;
       if (!uid) { toast.error("Login failed"); return; }
-      const { data: roleRows } = await supabase
+      const { data: roleRows, error: roleError } = await supabase
         .from("user_roles").select("role").eq("user_id", uid);
+      if (roleError) {
+        await supabase.auth.signOut();
+        toast.error("Could not verify admin role. Please try again.");
+        return;
+      }
       const roles = (roleRows ?? []).map((r) => r.role);
       if (!roles.includes("admin")) {
         // Reject — sign back out
         await supabase.auth.signOut();
         setRejectedRole(true);
-        await logSocEvent({
+        logSocEvent({
           threat_type: "admin_login_rejected",
           severity: "orange",
           field: "admin_login",
@@ -107,7 +112,7 @@ function AdminLogin() {
       // Success
       failRef.current = 0;
       writeFailCount(0);
-      await logSocEvent({
+      logSocEvent({
         threat_type: "admin_login_success",
         severity: "blue",
         field: "admin_login",

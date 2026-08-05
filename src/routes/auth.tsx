@@ -23,6 +23,18 @@ export const Route = createFileRoute("/auth")({ component: AuthPage });
 
 type View = "signin" | "forgot" | "forgot-sent";
 
+/** Await a promise, resolving to undefined on error or after 8s — never blocks the caller. */
+async function guard<T>(p: Promise<T>): Promise<T | undefined> {
+  try {
+    return await Promise.race([
+      p,
+      new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 8000)),
+    ]);
+  } catch {
+    return undefined;
+  }
+}
+
 function AuthPage() {
   const nav = useNavigate();
   const { role, user, loading, roleLoading } = useAuth();
@@ -86,9 +98,11 @@ function AuthPage() {
     setBusy(true);
     try {
       const { getRuleOn } = await import("@/lib/use-system-settings");
+      // Lockout check is best-effort: if it throws or times out, proceed with login
+      // rather than leaving the sign-in button dead.
       if (getRuleOn("rule.login_lockout", true)) {
-        const lock = await checkLoginLock({ data: { email } });
-        if (lock.locked && lock.until) {
+        const lock = await guard(checkLoginLock({ data: { email } }));
+        if (lock && lock.locked && lock.until) {
           setLockedUntil(new Date(lock.until).getTime());
           toast.error("Account temporarily locked");
           return;
@@ -96,7 +110,8 @@ function AuthPage() {
       }
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        const r = await registerFailedLogin({ data: { email } });
+        // Failed-login tracking is best-effort too — never let it block the response.
+        const r = await guard(registerFailedLogin({ data: { email } })) ?? { attempts: 0, locked: false, until: undefined };
         // Log brute-force attempts to SOC feed (toggle-gated)
         if (getRuleOn("rule.brute_force_detection", true)) {
           try {
